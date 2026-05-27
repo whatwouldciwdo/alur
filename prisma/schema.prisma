@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  PEGAWAI
+  OFFICER
+  TL
+  ASMAN
+  MANAGER
+  BRANCH_MANAGER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Bidang {
+  OPERASI
+  SDM_KEU
+  PEMELIHARAAN
+  ENGINEERING
+}
+
+enum SubBidang {
+  KEPMO
+  LINGKUNGAN
+  K3
+  OPERATOR_SHIFT
+  OPERATOR_NIAGA
+  SDM
+  UMUM
+  KEUANGAN
+  PBJ
+  LISTRIK
+  IC
+  MEKANIK
+  BOP
+  PDM
+  ADMIN_SEKRETARIS
+}
+
+enum LemburStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  REVISED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVISED
+}
+
+model User {
+  id              String     @id @default(cuid())
+  nip             String     @unique
+  nama            String
+  jenjangJabatan  String
+  bidang          Bidang
+  subBidang       SubBidang
+  role            Role       @default(PEGAWAI)
+  emailPerusahaan String     @unique
+  emailPersonal   String?
+  phone           String?
+  password        String
+  tlGroup         String?
+
+  lemburs         Lembur[]   @relation("PegawaiLembur")
+  approvals       Approval[] @relation("ApproverApproval")
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Lembur {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation("PegawaiLembur", fields: [userId], references: [id])
+
+  tanggalMulai    DateTime
+  tanggalSelesai  DateTime
+  deskripsi       String
+  lokasiKerja     String?
+  evidentUrl      String?
+  penugas         String?
+
+  status          LemburStatus @default(DRAFT)
+  currentStep     Int          @default(0)
+  totalSteps      Int          @default(5)
+
+  approvals       Approval[]
+
+  submittedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Approval {
+  id          String         @id @default(cuid())
+  lemburId    String
+  lembur      Lembur         @relation(fields: [lemburId], references: [id])
+
+  approverId  String
+  approver    User           @relation("ApproverApproval", fields: [approverId], references: [id])
+
+  step        Int
+  roleName    String
+
+  status      ApprovalStatus @default(PENDING)
+  catatan     String?
+
+  token       String?        @unique
+  tokenUsedAt DateTime?
+  expiresAt   DateTime?
+
+  respondedAt DateTime?
+  createdAt   DateTime       @default(now())
+}
