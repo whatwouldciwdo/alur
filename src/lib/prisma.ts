@@ -7,11 +7,7 @@ declare global {
 }
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("[prisma] DATABASE_URL is not set!");
-  }
-
+  const connectionString = process.env.DATABASE_URL || "postgresql://placeholder:placeholder@localhost:5432/placeholder";
   const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter } as any);
 }
