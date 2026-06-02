@@ -37,91 +37,97 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const formData = await req.formData();
-  const tanggalMulai  = formData.get("tanggalMulai") as string;
-  const tanggalSelesai = formData.get("tanggalSelesai") as string;
-  const deskripsi     = formData.get("deskripsi") as string;
-  const penugas       = formData.get("penugas") as string | null;
-  const evidentFile   = formData.get("evident") as File | null;
+    const formData = await req.formData();
+    const tanggalMulai  = formData.get("tanggalMulai") as string;
+    const tanggalSelesai = formData.get("tanggalSelesai") as string;
+    const deskripsi     = formData.get("deskripsi") as string;
+    const penugas       = formData.get("penugas") as string | null;
+    const evidentFile   = formData.get("evident") as File | null;
 
-  if (!tanggalMulai || !tanggalSelesai || !deskripsi) {
-    return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
-  }
-
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
-
-  let evidentUrl: string | undefined;
-  if (evidentFile && evidentFile.size > 0) {
-    const bytes  = await evidentFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    evidentUrl   = await uploadEvidensi(buffer, evidentFile.name, evidentFile.type);
-  }
-
-  const subBidang  = user.subBidang as SubBidang;
-  const steps      = getWorkflowSteps(subBidang);
-  const totalSteps = getTotalSteps(subBidang);
-
-  const lembur = await prisma.lembur.create({
-    data: {
-      userId: user.id,
-      tanggalMulai:  new Date(tanggalMulai),
-      tanggalSelesai: new Date(tanggalSelesai),
-      deskripsi,
-      penugas: penugas || null,
-      evidentUrl,
-      status: "PENDING",
-      currentStep: 1,
-      totalSteps,
-      submittedAt: new Date(),
-    },
-  });
-
-  await prisma.approval.createMany({
-    data: steps.map((s) => ({
-      lemburId:  lembur.id,
-      approverId: user.id,
-      step:      s.step,
-      roleName:  s.roleName,
-      status:    "PENDING",
-      token:     generateToken(),
-      expiresAt: tokenExpiry(),
-    })),
-  });
-
-  const firstStep     = steps[0];
-  const firstApprover = await findApprover(firstStep, user.tlGroup ?? undefined);
-
-  if (firstApprover) {
-    await prisma.approval.updateMany({
-      where: { lemburId: lembur.id, step: 1 },
-      data:  { approverId: firstApprover.id },
-    });
-
-    const approval1 = await prisma.approval.findFirst({
-      where: { lemburId: lembur.id, step: 1 },
-    });
-
-    if (approval1?.token) {
-      await sendApprovalRequestEmail({
-        to:            firstApprover.emailPersonal || firstApprover.emailPerusahaan,
-        approverName:  firstApprover.nama,
-        pegawaiName:   user.nama,
-        subBidang:     user.subBidang,
-        tanggalMulai:  lembur.tanggalMulai,
-        tanggalSelesai: lembur.tanggalSelesai,
-        deskripsi:     lembur.deskripsi,
-        lemburId:      lembur.id,
-        roleName:      firstStep.roleName,
-        token:         approval1.token,
-      });
+    if (!tanggalMulai || !tanggalSelesai || !deskripsi) {
+      return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
     }
-  }
 
-  return NextResponse.json({ success: true, lemburId: lembur.id }, { status: 201 });
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
+
+    let evidentUrl: string | undefined;
+    if (evidentFile && evidentFile.size > 0) {
+      const bytes  = await evidentFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      evidentUrl   = await uploadEvidensi(buffer, evidentFile.name, evidentFile.type);
+    }
+
+    const subBidang  = user.subBidang as SubBidang;
+    const steps      = getWorkflowSteps(subBidang);
+    const totalSteps = getTotalSteps(subBidang);
+
+    const lembur = await prisma.lembur.create({
+      data: {
+        userId: user.id,
+        tanggalMulai:  new Date(tanggalMulai),
+        tanggalSelesai: new Date(tanggalSelesai),
+        deskripsi,
+        penugas: penugas || null,
+        evidentUrl,
+        status: "PENDING",
+        currentStep: 1,
+        totalSteps,
+        submittedAt: new Date(),
+      },
+    });
+
+    await prisma.approval.createMany({
+      data: steps.map((s) => ({
+        lemburId:  lembur.id,
+        approverId: user.id,
+        step:      s.step,
+        roleName:  s.roleName,
+        status:    "PENDING",
+        token:     generateToken(),
+        expiresAt: tokenExpiry(),
+      })),
+    });
+
+    const firstStep     = steps[0];
+    const firstApprover = await findApprover(firstStep, user.tlGroup ?? undefined);
+
+    if (firstApprover) {
+      await prisma.approval.updateMany({
+        where: { lemburId: lembur.id, step: 1 },
+        data:  { approverId: firstApprover.id },
+      });
+
+      const approval1 = await prisma.approval.findFirst({
+        where: { lemburId: lembur.id, step: 1 },
+      });
+
+      if (approval1?.token) {
+        await sendApprovalRequestEmail({
+          to:            firstApprover.emailPersonal || firstApprover.emailPerusahaan,
+          approverName:  firstApprover.nama,
+          pegawaiName:   user.nama,
+          subBidang:     user.subBidang,
+          tanggalMulai:  lembur.tanggalMulai,
+          tanggalSelesai: lembur.tanggalSelesai,
+          deskripsi:     lembur.deskripsi,
+          lemburId:      lembur.id,
+          roleName:      firstStep.roleName,
+          token:         approval1.token,
+        });
+      }
+    }
+
+    return NextResponse.json({ success: true, lemburId: lembur.id }, { status: 201 });
+  } catch (error: unknown) {
+    console.error("[POST /api/lembur] Error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 async function findApprover(
