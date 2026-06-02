@@ -57,9 +57,13 @@ export async function POST(req: NextRequest) {
 
     let evidentUrl: string | undefined;
     if (evidentFile && evidentFile.size > 0) {
-      const bytes  = await evidentFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      evidentUrl   = await uploadEvidensi(buffer, evidentFile.name, evidentFile.type);
+      try {
+        const bytes  = await evidentFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        evidentUrl   = await uploadEvidensi(buffer, evidentFile.name, evidentFile.type);
+      } catch (uploadErr) {
+        console.warn("[POST /api/lembur] Upload evidensi gagal, lanjut tanpa file:", uploadErr);
+      }
     }
 
     const subBidang  = user.subBidang as SubBidang;
