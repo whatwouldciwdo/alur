@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
 
     if (approval1?.token) {
       await sendApprovalRequestEmail({
-        to:            firstApprover.emailPerusahaan,
+        to:            firstApprover.emailPersonal || firstApprover.emailPerusahaan,
         approverName:  firstApprover.nama,
         pegawaiName:   user.nama,
         subBidang:     user.subBidang,

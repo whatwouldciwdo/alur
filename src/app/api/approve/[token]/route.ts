@@ -129,7 +129,7 @@ export async function POST(
   if (action === "REJECTED") {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "REJECTED" } });
     await sendRejectedEmail({
-      to:           lembur.user.emailPerusahaan,
+      to:           lembur.user.emailPersonal || lembur.user.emailPerusahaan,
       pegawaiName:  lembur.user.nama,
       rejectorName: approverName,
       roleName:     approval.roleName,
@@ -142,7 +142,7 @@ export async function POST(
   if (action === "REVISED") {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "REVISED", currentStep: 0 } });
     await sendRevisionEmail({
-      to:          lembur.user.emailPerusahaan,
+      to:          lembur.user.emailPersonal || lembur.user.emailPerusahaan,
       pegawaiName: lembur.user.nama,
       revisorName: approverName,
       roleName:    approval.roleName,
@@ -158,7 +158,7 @@ export async function POST(
   if (!nextStep) {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "APPROVED" } });
     await sendApprovedEmail({
-      to:            lembur.user.emailPerusahaan,
+      to:            lembur.user.emailPersonal || lembur.user.emailPerusahaan,
       pegawaiName:   lembur.user.nama,
       tanggalMulai:  lembur.tanggalMulai,
       tanggalSelesai: lembur.tanggalSelesai,
@@ -181,7 +181,7 @@ export async function POST(
 
     if (nextApproval?.token) {
       await sendApprovalRequestEmail({
-        to:            nextApprover.emailPerusahaan,
+        to:            nextApprover.emailPersonal || nextApprover.emailPerusahaan,
         approverName:  nextApprover.nama,
         pegawaiName:   lembur.user.nama,
         subBidang:     lembur.user.subBidang,
