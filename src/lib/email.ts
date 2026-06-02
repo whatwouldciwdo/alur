@@ -8,11 +8,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function getBaseUrl(): string {
-  let base = process.env.NEXTAUTH_URL || "https://alur-pips.netlify.app";
-  if (process.env.NODE_ENV === "production" && base.includes("localhost")) {
-    base = "https://alur-pips.netlify.app";
-  }
+export function getBaseUrl(): string {
+  let base = process.env.NEXTAUTH_URL || process.env.URL || "http://localhost:3000";
   if (base.endsWith("/")) {
     base = base.slice(0, -1);
   }

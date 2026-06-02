@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { sendPasswordResetEmail, getBaseUrl } from "@/lib/email";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET!;
@@ -32,13 +32,7 @@ export async function POST(req: NextRequest) {
     { expiresIn: "15m" }
   );
 
-  let base = process.env.NEXTAUTH_URL ?? "https://alur-pips.netlify.app";
-  if (process.env.NODE_ENV === "production" && base.includes("localhost")) {
-    base = "https://alur-pips.netlify.app";
-  }
-  if (base.endsWith("/")) {
-    base = base.slice(0, -1);
-  }
+  const base = getBaseUrl();
   const resetUrl = `${base}/reset-password/${token}`;
 
   await sendPasswordResetEmail({
