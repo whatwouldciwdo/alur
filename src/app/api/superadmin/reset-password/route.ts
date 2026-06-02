@@ -32,7 +32,13 @@ export async function POST(req: NextRequest) {
     { expiresIn: "15m" }
   );
 
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  let base = process.env.NEXTAUTH_URL ?? "https://alur-pips.netlify.app";
+  if (process.env.NODE_ENV === "production" && base.includes("localhost")) {
+    base = "https://alur-pips.netlify.app";
+  }
+  if (base.endsWith("/")) {
+    base = base.slice(0, -1);
+  }
   const resetUrl = `${base}/reset-password/${token}`;
 
   await sendPasswordResetEmail({

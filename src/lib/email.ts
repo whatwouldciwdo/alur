@@ -8,6 +8,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+function getBaseUrl(): string {
+  let base = process.env.NEXTAUTH_URL || "https://alur-pips.netlify.app";
+  if (process.env.NODE_ENV === "production" && base.includes("localhost")) {
+    base = "https://alur-pips.netlify.app";
+  }
+  if (base.endsWith("/")) {
+    base = base.slice(0, -1);
+  }
+  return base;
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -94,7 +105,7 @@ export async function sendApprovalRequestEmail({
   roleName: string;
   token: string;
 }) {
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = getBaseUrl();
   const approveUrl = `${base}/approve/${token}?action=APPROVED`;
   const revisiUrl  = `${base}/approve/${token}?action=REVISED`;
   const tolakUrl   = `${base}/approve/${token}?action=REJECTED`;
@@ -217,7 +228,7 @@ export async function sendRevisionEmail({
     </div>
     <p>Silakan login ke aplikasi ALUR untuk memperbaiki pengajuan Anda.</p>
     <p style="text-align:center; margin-top:24px;">
-      <a href="${process.env.NEXTAUTH_URL}/history"
+      <a href="${getBaseUrl()}/history"
          style="background:#006934;color:#fff;padding:12px 32px;border-radius:100px;text-decoration:none;font-weight:bold;letter-spacing:1px;border:2px solid #1b1c1c;display:inline-block;">
         BUKA HISTORY LEMBUR
       </a>
