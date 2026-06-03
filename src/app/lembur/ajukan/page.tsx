@@ -48,7 +48,7 @@ export default function AjukanLembur() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-        const timestamp = pos.timestamp;
+        const timestamp = Date.now();
 
         if (accuracy <= 0 || accuracy < 1) {
           setLocStatus("fake_detected");
