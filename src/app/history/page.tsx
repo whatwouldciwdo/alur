@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Clock, CheckCircle, XCircle, AlertCircle, Plus } from "lucide-react";
+import { Clock, CheckCircle, XCircle, AlertCircle, Plus, Timer, Building2 } from "lucide-react";
 
 interface Lembur {
   id: string;
@@ -86,7 +86,7 @@ export default function HistoryLembur() {
                           ? "bg-secondary/20 text-on-secondary"
                           : "bg-primary-container/60 text-on-primary"
                       }`}>
-                        {lembur.kategori === "PIKET" ? "🏢 Piket" : "⏱ Lembur"}
+                        {lembur.kategori === "PIKET" ? <><Building2 size={11} /> Piket</> : <><Timer size={11} /> Lembur</>}
                       </span>
                     )}
                     <p className="font-body-md font-bold line-clamp-1">

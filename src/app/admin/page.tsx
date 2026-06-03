@@ -19,6 +19,8 @@ import {
   Download,
   RefreshCw,
   ShieldCheck,
+  Timer,
+  Building2,
 } from "lucide-react";
 
 interface Approval {
@@ -69,8 +71,8 @@ const STATUS_OPTIONS = [
 
 const KATEGORI_OPTIONS = [
   { value: "", label: "Semua Kategori" },
-  { value: "LEMBUR", label: "⏱ Lembur" },
-  { value: "PIKET", label: "🏢 Piket" },
+  { value: "LEMBUR", label: "Lembur" },
+  { value: "PIKET", label: "Piket" },
 ];
 
 const STATUS_CFG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
@@ -633,7 +635,9 @@ export default function AdminPage() {
                           <span className={`inline-flex items-center gap-1 font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/20 ${
                             l.kategori === "PIKET" ? "bg-secondary/10 text-on-secondary" : "bg-primary-container/40 text-on-primary"
                           }`}>
-                            {l.kategori === "PIKET" ? "🏢 Piket" : "⏱ Lembur"}
+                          {l.kategori === "PIKET"
+                            ? <><Building2 size={11} /> Piket</>
+                            : <><Timer size={11} /> Lembur</>}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs font-medium text-on-surface">

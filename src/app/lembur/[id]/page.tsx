@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle, User } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle, User, Timer, Building2 } from "lucide-react";
 
 interface Approval {
   id: string;
@@ -103,7 +103,7 @@ export default function DetailLembur({ params }: { params: Promise<{ id: string 
                   ? "bg-secondary text-on-secondary"
                   : "bg-primary-container text-on-primary"
               }`}>
-                {lembur.kategori === "PIKET" ? "🏢 PIKET" : "⏱ LEMBUR"}
+                {lembur.kategori === "PIKET" ? <><Building2 size={12} /> PIKET</> : <><Timer size={12} /> LEMBUR</>}
               </span>
             )}
             <span className={`flex items-center gap-2 font-label-bold text-sm px-4 py-2 rounded-full border-2 border-on-background ${cfg.color}`}>

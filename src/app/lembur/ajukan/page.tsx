@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowLeft, Clock, CheckCircle, Upload, X } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle, Upload, X, Timer, Building2 } from "lucide-react";
 
 const LS_KEY = "alur_lembur_draft";
 
@@ -156,24 +156,24 @@ export default function AjukanLembur() {
             <button
               type="button"
               onClick={() => setKategori("LEMBUR")}
-              className={`px-5 py-2 font-label-bold text-sm transition-all ${
+              className={`flex items-center gap-1.5 px-5 py-2 font-label-bold text-sm transition-all ${
                 kategori === "LEMBUR"
                   ? "bg-primary text-on-primary"
                   : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
               }`}
             >
-              ⏱ LEMBUR
+              <Timer size={14} /> LEMBUR
             </button>
             <button
               type="button"
               onClick={() => setKategori("PIKET")}
-              className={`px-5 py-2 font-label-bold text-sm transition-all ${
+              className={`flex items-center gap-1.5 px-5 py-2 font-label-bold text-sm transition-all ${
                 kategori === "PIKET"
                   ? "bg-secondary text-on-secondary"
                   : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
               }`}
             >
-              🏢 PIKET
+              <Building2 size={14} /> PIKET
             </button>
           </div>
         </div>
