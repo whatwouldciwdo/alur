@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ArrowLeft, Clock, CheckCircle, Upload, X, Timer, Building2, WifiOff, ShieldAlert } from "lucide-react";
+import { getLocalIp } from "@/lib/webrtc-ip";
 
 const LS_KEY = "alur_lembur_draft";
 
@@ -37,16 +38,22 @@ export default function AjukanLembur() {
 
   type IpStatus = "loading" | "office" | "outside" | "bypass";
   const [ipStatus, setIpStatus] = useState<IpStatus>("loading");
+  const [localIp, setLocalIp] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/check-ip")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.bypass) setIpStatus("bypass");
-        else if (data.isOffice) setIpStatus("office");
-        else setIpStatus("outside");
-      })
-      .catch(() => setIpStatus("outside"));
+    getLocalIp().then((ip) => {
+      setLocalIp(ip);
+      const headers: HeadersInit = {};
+      if (ip) headers["x-local-ip"] = ip;
+      fetch("/api/check-ip", { headers })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.bypass) setIpStatus("bypass");
+          else if (data.isOffice) setIpStatus("office");
+          else setIpStatus("outside");
+        })
+        .catch(() => setIpStatus("outside"));
+    });
   }, []);
 
   const isBlocked = ipStatus === "outside";
@@ -130,8 +137,12 @@ export default function AjukanLembur() {
         formData.append("evident", dokFile);
       }
 
+      const headers: HeadersInit = {};
+      if (localIp) headers["x-local-ip"] = localIp;
+
       const res = await fetch("/api/lembur", {
         method: "POST",
+        headers,
         body: formData,
       });
 

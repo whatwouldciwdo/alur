@@ -7,7 +7,7 @@ import { sendApprovalRequestEmail } from "@/lib/email";
 import { uploadEvidensi } from "@/lib/supabase";
 import { SubBidang, Kategori } from "@prisma/client";
 import crypto from "crypto";
-import { getClientIp, isOfficeIp, shouldBypassIpCheck } from "@/lib/ip";
+import { isOfficeIp, shouldBypassIpCheck } from "@/lib/ip";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -25,7 +25,6 @@ async function generateNomorSpkl(tanggalMulai: Date): Promise<string> {
   const tahun = tanggalMulai.getFullYear();
   const bulanRomawi = BULAN_ROMAWI[tanggalMulai.getMonth()];
 
-  // Count existing lembur this year to get sequence
   const count = await prisma.lembur.count({
     where: {
       nomorSpkl: { not: null },
@@ -64,9 +63,9 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     if (!shouldBypassIpCheck(session.user.role)) {
-      const clientIp = getClientIp(req);
-      if (!isOfficeIp(clientIp)) {
-        console.warn(`[POST /api/lembur] Akses ditolak — IP: ${clientIp}, User: ${session.user.id}`);
+      const localIp = req.headers.get("x-local-ip") ?? "";
+      if (!localIp || !isOfficeIp(localIp)) {
+        console.warn(`[POST /api/lembur] Akses ditolak — localIp: "${localIp}", User: ${session.user.id}`);
         return NextResponse.json(
           { error: "Pengajuan hanya dapat dilakukan dari jaringan kantor." },
           { status: 403 }
