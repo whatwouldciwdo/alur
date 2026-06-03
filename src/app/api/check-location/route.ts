@@ -38,9 +38,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ isOffice: false, reason: integrity.reason }, { status: 422 });
   }
 
+  const officeLat = parseFloat(process.env.OFFICE_LAT ?? "");
+  const officeLng = parseFloat(process.env.OFFICE_LNG ?? "");
+  const radius = parseFloat(process.env.OFFICE_RADIUS_METERS ?? "300");
+
   const inOffice = isWithinOffice(lat, lng);
   if (!inOffice) {
-    return NextResponse.json({ isOffice: false });
+    const R = 6371000;
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const dLat = toRad(officeLat - lat);
+    const dLng = toRad(officeLng - lng);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(officeLat)) * Math.sin(dLng / 2) ** 2;
+    const distance = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    return NextResponse.json({ isOffice: false, debug: { userLat: lat, userLng: lng, officeLat, officeLng, distanceMeters: distance, radiusMeters: radius } });
   }
 
   const token = signLocationToken(lat, lng, session.user.id, timestamp);
