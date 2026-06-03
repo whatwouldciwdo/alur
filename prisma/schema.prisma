@@ -57,6 +57,11 @@ enum ApprovalStatus {
   REVISED
 }
 
+enum Kategori {
+  LEMBUR
+  PIKET
+}
+
 model User {
   id              String     @id @default(cuid())
   nip             String     @unique
@@ -93,6 +98,8 @@ model Lembur {
   status          LemburStatus @default(DRAFT)
   currentStep     Int          @default(0)
   totalSteps      Int          @default(5)
+  nomorSpkl       String?      @unique
+  kategori        Kategori     @default(LEMBUR)
 
   approvals       Approval[]
 

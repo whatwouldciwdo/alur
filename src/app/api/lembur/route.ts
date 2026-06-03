@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getWorkflowSteps, getTotalSteps } from "@/lib/workflow";
 import { sendApprovalRequestEmail } from "@/lib/email";
 import { uploadEvidensi } from "@/lib/supabase";
-import { SubBidang } from "@prisma/client";
+import { SubBidang, Kategori } from "@prisma/client";
 import crypto from "crypto";
 
 function generateToken(): string {
@@ -16,6 +16,27 @@ function tokenExpiry(): Date {
   const d = new Date();
   d.setDate(d.getDate() + 7);
   return d;
+}
+
+const BULAN_ROMAWI = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+
+async function generateNomorSpkl(tanggalMulai: Date): Promise<string> {
+  const tahun = tanggalMulai.getFullYear();
+  const bulanRomawi = BULAN_ROMAWI[tanggalMulai.getMonth()];
+
+  // Count existing lembur this year to get sequence
+  const count = await prisma.lembur.count({
+    where: {
+      nomorSpkl: { not: null },
+      tanggalMulai: {
+        gte: new Date(tahun, 0, 1),
+        lt: new Date(tahun + 1, 0, 1),
+      },
+    },
+  });
+
+  const noUrut = String(count + 1).padStart(3, "0");
+  return `${noUrut}/PLNIPS/SPKL/${bulanRomawi}/${tahun}/UNIT CILEGON`;
 }
 
 export async function GET(req: NextRequest) {
@@ -42,15 +63,19 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const formData = await req.formData();
-    const tanggalMulai  = formData.get("tanggalMulai") as string;
+    const tanggalMulai   = formData.get("tanggalMulai") as string;
     const tanggalSelesai = formData.get("tanggalSelesai") as string;
-    const deskripsi     = formData.get("deskripsi") as string;
-    const penugas       = formData.get("penugas") as string | null;
-    const evidentFile   = formData.get("evident") as File | null;
+    const deskripsi      = formData.get("deskripsi") as string;
+    const penugas        = formData.get("penugas") as string | null;
+    const kategoriRaw    = formData.get("kategori") as string | null;
+    const evidentFile    = formData.get("evident") as File | null;
 
     if (!tanggalMulai || !tanggalSelesai || !deskripsi) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
     }
+
+    const kategori: Kategori =
+      kategoriRaw === "PIKET" ? "PIKET" : "LEMBUR";
 
     const user = await prisma.user.findUnique({ where: { id: session.user.id } });
     if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
@@ -66,34 +91,38 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const tanggalMulaiDate = new Date(tanggalMulai);
     const subBidang  = user.subBidang as SubBidang;
     const steps      = getWorkflowSteps(subBidang);
     const totalSteps = getTotalSteps(subBidang);
+    const nomorSpkl  = await generateNomorSpkl(tanggalMulaiDate);
 
     const lembur = await prisma.lembur.create({
       data: {
-        userId: user.id,
-        tanggalMulai:  new Date(tanggalMulai),
+        userId:        user.id,
+        tanggalMulai:  tanggalMulaiDate,
         tanggalSelesai: new Date(tanggalSelesai),
         deskripsi,
-        penugas: penugas || null,
+        penugas:       penugas || null,
         evidentUrl,
-        status: "PENDING",
-        currentStep: 1,
+        status:        "PENDING",
+        currentStep:   1,
         totalSteps,
-        submittedAt: new Date(),
+        nomorSpkl,
+        kategori,
+        submittedAt:   new Date(),
       },
     });
 
     await prisma.approval.createMany({
       data: steps.map((s) => ({
-        lemburId:  lembur.id,
+        lemburId:   lembur.id,
         approverId: user.id,
-        step:      s.step,
-        roleName:  s.roleName,
-        status:    "PENDING",
-        token:     generateToken(),
-        expiresAt: tokenExpiry(),
+        step:       s.step,
+        roleName:   s.roleName,
+        status:     "PENDING",
+        token:      generateToken(),
+        expiresAt:  tokenExpiry(),
       })),
     });
 
@@ -112,16 +141,16 @@ export async function POST(req: NextRequest) {
 
       if (approval1?.token) {
         await sendApprovalRequestEmail({
-          to:            firstApprover.emailPersonal || firstApprover.emailPerusahaan,
-          approverName:  firstApprover.nama,
-          pegawaiName:   user.nama,
-          subBidang:     user.subBidang,
-          tanggalMulai:  lembur.tanggalMulai,
+          to:             firstApprover.emailPersonal || firstApprover.emailPerusahaan,
+          approverName:   firstApprover.nama,
+          pegawaiName:    user.nama,
+          subBidang:      user.subBidang,
+          tanggalMulai:   lembur.tanggalMulai,
           tanggalSelesai: lembur.tanggalSelesai,
-          deskripsi:     lembur.deskripsi,
-          lemburId:      lembur.id,
-          roleName:      firstStep.roleName,
-          token:         approval1.token,
+          deskripsi:      lembur.deskripsi,
+          lemburId:       lembur.id,
+          roleName:       firstStep.roleName,
+          token:          approval1.token,
         });
       }
     }

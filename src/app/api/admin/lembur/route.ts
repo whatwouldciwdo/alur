@@ -10,9 +10,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
-  const bulan  = searchParams.get("bulan");
-  const bidang = searchParams.get("bidang");
-  const status = searchParams.get("status");
+  const bulan    = searchParams.get("bulan");
+  const bidang   = searchParams.get("bidang");
+  const status   = searchParams.get("status");
+  const kategori = searchParams.get("kategori");
 
   let tanggalFilter = {};
   if (bulan) {
@@ -23,8 +24,9 @@ export async function GET(req: NextRequest) {
   }
 
   const where: Record<string, unknown> = { ...tanggalFilter };
-  if (bidang) where.user   = { bidang };
-  if (status) where.status = status;
+  if (bidang)   where.user    = { bidang };
+  if (status)   where.status  = status;
+  if (kategori) where.kategori = kategori;
 
   const lemburs = await prisma.lembur.findMany({
     where,

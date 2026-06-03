@@ -37,6 +37,8 @@ interface LemburItem {
   tanggalSelesai: string;
   deskripsi: string;
   penugas: string | null;
+  nomorSpkl?: string;
+  kategori?: string;
   submittedAt: string;
   user: {
     nama: string;
@@ -63,6 +65,12 @@ const STATUS_OPTIONS = [
   { value: "PENDING", label: "Menunggu Approval" },
   { value: "REJECTED", label: "Ditolak" },
   { value: "REVISED", label: "Perlu Revisi" },
+];
+
+const KATEGORI_OPTIONS = [
+  { value: "", label: "Semua Kategori" },
+  { value: "LEMBUR", label: "⏱ Lembur" },
+  { value: "PIKET", label: "🏢 Piket" },
 ];
 
 const STATUS_CFG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
@@ -123,8 +131,9 @@ export default function AdminPage() {
   const [bulan, setBulan] = useState("");
   const [bidang, setBidang] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [kategoriFilter, setKategoriFilter] = useState("");
 
-  const hasFilter = bulan !== "" || bidang !== "" || statusFilter !== "";
+  const hasFilter = bulan !== "" || bidang !== "" || statusFilter !== "" || kategoriFilter !== "";
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -133,6 +142,7 @@ export default function AdminPage() {
       if (bulan) params.set("bulan", bulan);
       if (bidang) params.set("bidang", bidang);
       if (statusFilter) params.set("status", statusFilter);
+      if (kategoriFilter) params.set("kategori", kategoriFilter);
 
       const res = await fetch(`/api/admin/lembur?${params}`);
       const data = await res.json();
@@ -142,7 +152,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [bulan, bidang, statusFilter]);
+  }, [bulan, bidang, statusFilter, kategoriFilter]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -203,16 +213,17 @@ export default function AdminPage() {
     setExporting("xlsx");
     try {
       const params = new URLSearchParams();
-      if (bulan) params.set("bulan", bulan);
-      if (bidang) params.set("bidang", bidang);
-      if (statusFilter) params.set("status", statusFilter);
+      if (bulan)          params.set("bulan", bulan);
+      if (bidang)         params.set("bidang", bidang);
+      if (statusFilter)   params.set("status", statusFilter);
+      if (kategoriFilter) params.set("kategori", kategoriFilter);
 
       const res = await fetch(`/api/admin/export?${params}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `rekap-lembur${bulan ? "-" + bulan : ""}${bidang ? "-" + bidang.toLowerCase() : ""}.xlsx`;
+      a.download = `rekap-lembur${bulan ? "-" + bulan : ""}${bidang ? "-" + bidang.toLowerCase() : ""}${kategoriFilter ? "-" + kategoriFilter.toLowerCase() : ""}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -449,14 +460,14 @@ export default function AdminPage() {
           </div>
           {hasFilter && (
             <button
-              onClick={() => { setBulan(""); setBidang(""); setStatusFilter(""); }}
+              onClick={() => { setBulan(""); setBidang(""); setStatusFilter(""); setKategoriFilter(""); }}
               className="flex items-center gap-1 font-label-bold text-xs text-on-surface-variant border border-on-background/30 px-2.5 py-1 rounded-full hover:bg-surface-variant transition-colors"
             >
               <XCircle size={12} /> Reset Filter
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Filter Bulan */}
           <div className="flex flex-col gap-1.5">
             <label className="font-label-bold text-xs uppercase text-on-surface-variant flex items-center gap-1.5">
@@ -501,6 +512,23 @@ export default function AdminPage() {
               className="bg-surface-variant border-2 border-on-background rounded-xl px-3 py-2.5 font-body-md text-sm text-on-surface focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer"
             >
               {STATUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter Kategori */}
+          <div className="flex flex-col gap-1.5">
+            <label className="font-label-bold text-xs uppercase text-on-surface-variant flex items-center gap-1.5">
+              <AlertCircle size={13} /> Kategori
+            </label>
+            <select
+              id="filter-kategori"
+              value={kategoriFilter}
+              onChange={e => setKategoriFilter(e.target.value)}
+              className="bg-surface-variant border-2 border-on-background rounded-xl px-3 py-2.5 font-body-md text-sm text-on-surface focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer"
+            >
+              {KATEGORI_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -576,10 +604,12 @@ export default function AdminPage() {
                   <tr className="bg-primary text-on-primary border-b-2 border-on-background">
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">No</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Nama / NIP</th>
+                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Kategori</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Bidang</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Sub Bidang</th>
-                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Periode Lembur</th>
+                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Periode</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Durasi</th>
+                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Nomor SPKL</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Deskripsi</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Status</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap"></th>
@@ -599,6 +629,13 @@ export default function AdminPage() {
                           <p className="text-xs text-on-surface-variant">{l.user.nip}</p>
                           <p className="text-xs text-on-surface-variant">{l.user.jenjangJabatan}</p>
                         </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/20 ${
+                            l.kategori === "PIKET" ? "bg-secondary/10 text-on-secondary" : "bg-primary-container/40 text-on-primary"
+                          }`}>
+                            {l.kategori === "PIKET" ? "🏢 Piket" : "⏱ Lembur"}
+                          </span>
+                        </td>
                         <td className="px-4 py-3 text-xs font-medium text-on-surface">
                           {l.user.bidang.replace("_", " & ")}
                         </td>
@@ -611,6 +648,11 @@ export default function AdminPage() {
                         </td>
                         <td className="px-4 py-3 text-xs font-medium text-on-surface whitespace-nowrap">
                           {formatDurasi(l.tanggalMulai, l.tanggalSelesai)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="text-xs font-mono text-on-surface-variant whitespace-nowrap">
+                            {l.nomorSpkl ?? <span className="italic text-on-surface-variant/50">—</span>}
+                          </p>
                         </td>
                         <td className="px-4 py-3 max-w-[200px]">
                           {(() => {

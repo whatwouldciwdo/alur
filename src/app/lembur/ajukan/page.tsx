@@ -30,6 +30,7 @@ export default function AjukanLembur() {
   const formatJamShort = (d: Date) =>
     d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
+  const [kategori, setKategori] = useState<"LEMBUR" | "PIKET">("LEMBUR");
   const [clockIn, setClockIn] = useState<Date | null>(null);
   const [clockOut, setClockOut] = useState<Date | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -108,6 +109,7 @@ export default function AjukanLembur() {
       formData.append("tanggalSelesai", clockOut.toISOString());
       formData.append("deskripsi", `DASAR: ${dasarPekerjaan}\n\nURAIAN: ${uraianPekerjaan}`);
       formData.append("penugas", penugas);
+      formData.append("kategori", kategori);
       if (dokFile) {
         formData.append("evident", dokFile);
       }
@@ -145,9 +147,36 @@ export default function AjukanLembur() {
         <Link href="/dashboard" className="flex items-center gap-2 font-label-bold text-label-bold text-primary mb-1 hover:underline w-fit">
           <ArrowLeft size={16} /> Kembali ke Dashboard
         </Link>
-        <h1 className="font-headline-lg text-2xl sm:text-headline-lg text-on-background tracking-tight">
-          FORM LEMBUR BARU
-        </h1>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h1 className="font-headline-lg text-2xl sm:text-headline-lg text-on-background tracking-tight">
+            FORM PENGAJUAN
+          </h1>
+          {/* Toggle Kategori */}
+          <div className="flex items-center border-2 border-on-background rounded-full overflow-hidden hard-shadow">
+            <button
+              type="button"
+              onClick={() => setKategori("LEMBUR")}
+              className={`px-5 py-2 font-label-bold text-sm transition-all ${
+                kategori === "LEMBUR"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
+              }`}
+            >
+              ⏱ LEMBUR
+            </button>
+            <button
+              type="button"
+              onClick={() => setKategori("PIKET")}
+              className={`px-5 py-2 font-label-bold text-sm transition-all ${
+                kategori === "PIKET"
+                  ? "bg-secondary text-on-secondary"
+                  : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
+              }`}
+            >
+              🏢 PIKET
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Live Clock Banner ── */}
@@ -435,9 +464,13 @@ export default function AjukanLembur() {
           <button
             type="submit"
             disabled={isLoading || !clockIn || !clockOut}
-            className="w-full bg-primary text-on-primary font-label-bold text-label-bold rounded-full px-6 py-4 mt-2 border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full font-label-bold text-label-bold rounded-full px-6 py-4 mt-2 border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              kategori === "PIKET"
+                ? "bg-secondary text-on-secondary"
+                : "bg-primary text-on-primary"
+            }`}
           >
-            {isLoading ? "MENGAJUKAN..." : "SUBMIT PENGAJUAN LEMBUR"}
+            {isLoading ? "MENGAJUKAN..." : `SUBMIT PENGAJUAN ${kategori}`}
           </button>
           {(!clockIn || !clockOut) && (
             <p className="text-center text-xs text-on-surface-variant -mt-3">

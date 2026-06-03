@@ -18,10 +18,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
-  const bulan = searchParams.get("bulan");
-  const bidang = searchParams.get("bidang");
-  const status = searchParams.get("status");
-  const format = searchParams.get("format") ?? "xlsx";
+  const bulan    = searchParams.get("bulan");
+  const bidang   = searchParams.get("bidang");
+  const status   = searchParams.get("status");
+  const kategori = searchParams.get("kategori");
+  const format   = searchParams.get("format") ?? "xlsx";
 
   let tanggalFilter = {};
   if (bulan) {
@@ -32,8 +33,9 @@ export async function GET(req: NextRequest) {
   }
 
   const where: Record<string, unknown> = { ...tanggalFilter };
-  if (bidang) where.user = { bidang };
-  if (status) where.status = status;
+  if (bidang)   where.user    = { bidang };
+  if (status)   where.status  = status;
+  if (kategori) where.kategori = kategori;
 
   const lemburs = await prisma.lembur.findMany({
     where,
@@ -65,6 +67,8 @@ export async function GET(req: NextRequest) {
 
     return {
       No: idx + 1,
+      Kategori: l.kategori ?? "LEMBUR",
+      "Nomor SPKL": l.nomorSpkl ?? "-",
       Nama: l.user.nama,
       NIP: l.user.nip,
       Jabatan: l.user.jenjangJabatan,
@@ -90,7 +94,8 @@ export async function GET(req: NextRequest) {
 
   const ws = XLSX.utils.json_to_sheet(rows);
   const colWidths = [
-    { wch: 5 }, { wch: 30 }, { wch: 15 }, { wch: 25 },
+    { wch: 5 }, { wch: 10 }, { wch: 35 },
+    { wch: 30 }, { wch: 15 }, { wch: 25 },
     { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 22 },
     { wch: 12 }, { wch: 50 }, { wch: 25 }, { wch: 15 }, { wch: 30 },
   ];

@@ -26,6 +26,8 @@ interface Lembur {
   evidentUrl?: string;
   lokasiKerja?: string;
   penugas?: string;
+  nomorSpkl?: string;
+  kategori?: string;
   submittedAt: string;
   user: { nama: string; nip: string; jenjangJabatan: string; bidang: string; subBidang: string };
   approvals: Approval[];
@@ -91,18 +93,37 @@ export default function DetailLembur({ params }: { params: Promise<{ id: string 
               <ArrowLeft size={16} /> Kembali
             </Link>
             <h1 className="font-headline-lg text-2xl sm:text-headline-lg text-on-background uppercase tracking-tight">
-              DETAIL LEMBUR
+              DETAIL {lembur.kategori === "PIKET" ? "PIKET" : "LEMBUR"}
             </h1>
           </div>
-          <span className={`flex items-center gap-2 font-label-bold text-sm px-4 py-2 rounded-full border-2 border-on-background ${cfg.color}`}>
-            {cfg.icon} {cfg.label}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            {lembur.kategori && (
+              <span className={`font-label-bold text-xs px-3 py-1.5 rounded-full border-2 border-on-background ${
+                lembur.kategori === "PIKET"
+                  ? "bg-secondary text-on-secondary"
+                  : "bg-primary-container text-on-primary"
+              }`}>
+                {lembur.kategori === "PIKET" ? "🏢 PIKET" : "⏱ LEMBUR"}
+              </span>
+            )}
+            <span className={`flex items-center gap-2 font-label-bold text-sm px-4 py-2 rounded-full border-2 border-on-background ${cfg.color}`}>
+              {cfg.icon} {cfg.label}
+            </span>
+          </div>
         </div>
 
         {/* Info Card */}
         <div className="bg-surface-container-lowest border-2 border-on-background rounded-[1.5rem] p-6 hard-shadow mb-6">
+          {/* Nomor SPKL */}
+          {lembur.nomorSpkl && (
+            <div className="mb-4 p-3 bg-primary-container border-2 border-on-background rounded-xl">
+              <p className="font-label-bold text-xs uppercase text-on-surface-variant mb-0.5">Nomor SPKL</p>
+              <p className="font-bold text-on-background tracking-wide text-sm">{lembur.nomorSpkl}</p>
+            </div>
+          )}
+
           <p className="text-sm font-medium text-on-surface mb-6">
-            Assistant Manager/Manager(*) <span className="font-bold underline px-1">{lembur.penugas || "................................"}</span> menugaskan kerja lembur kepada:
+            Assistant Manager/Manager(*) <span className="font-bold underline px-1">{lembur.penugas || "................................"}</span> menugaskan kerja {lembur.kategori === "PIKET" ? "piket" : "lembur"} kepada:
           </p>
           
           <div className="flex items-center gap-2 mb-4">

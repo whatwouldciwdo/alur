@@ -22,6 +22,8 @@ interface Lembur {
   tanggalMulai: string;
   tanggalSelesai: string;
   deskripsi: string;
+  nomorSpkl?: string;
+  kategori?: string;
   submittedAt: string;
   approvals: Approval[];
 }
@@ -55,7 +57,18 @@ function ApprovalProgressCard({ lembur }: { lembur: Lembur }) {
         {/* Header row */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
-            <p className="font-body-md text-sm text-on-surface-variant mb-0.5">{tanggal}</p>
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              {lembur.kategori && (
+                <span className={`font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/30 ${
+                  lembur.kategori === "PIKET"
+                    ? "bg-secondary/20 text-on-secondary"
+                    : "bg-primary-container/60 text-on-primary"
+                }`}>
+                  {lembur.kategori === "PIKET" ? "🏢 Piket" : "⏱ Lembur"}
+                </span>
+              )}
+              <p className="font-body-md text-sm text-on-surface-variant">{tanggal}</p>
+            </div>
             <p className="font-bold text-base text-on-background">
               {lembur.deskripsi.replace(/^DASAR:\s*/i, "").split("\n")[0]}
             </p>

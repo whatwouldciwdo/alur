@@ -13,6 +13,8 @@ interface Lembur {
   tanggalMulai: string;
   tanggalSelesai: string;
   deskripsi: string;
+  nomorSpkl?: string;
+  kategori?: string;
   submittedAt: string;
 }
 
@@ -77,9 +79,20 @@ export default function HistoryLembur() {
                 className="w-full bg-surface-container-lowest border-2 border-on-background rounded-[1.5rem] p-5 hard-shadow hard-shadow-hover transition-all flex flex-col sm:flex-row sm:items-center gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-body-md font-bold mb-0.5 line-clamp-1">
-                    {lembur.deskripsi.match(/DASAR:\s*([\s\S]*?)(?:\n\n|$)/i)?.[1]?.trim() ?? lembur.deskripsi.split("\n")[0]}
-                  </p>
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    {lembur.kategori && (
+                      <span className={`font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/30 ${
+                        lembur.kategori === "PIKET"
+                          ? "bg-secondary/20 text-on-secondary"
+                          : "bg-primary-container/60 text-on-primary"
+                      }`}>
+                        {lembur.kategori === "PIKET" ? "🏢 Piket" : "⏱ Lembur"}
+                      </span>
+                    )}
+                    <p className="font-body-md font-bold line-clamp-1">
+                      {lembur.deskripsi.match(/DASAR:\s*([\s\S]*?)(?:\n\n|$)/i)?.[1]?.trim() ?? lembur.deskripsi.split("\n")[0]}
+                    </p>
+                  </div>
                   {lembur.deskripsi.match(/URAIAN:\s*([\s\S]*?)$/i)?.[1]?.trim() && (
                     <p className="text-xs text-on-surface-variant mb-1 line-clamp-1">
                       {lembur.deskripsi.match(/URAIAN:\s*([\s\S]*?)$/i)?.[1]?.trim()}
@@ -90,6 +103,9 @@ export default function HistoryLembur() {
                     {" → "}
                     {new Date(lembur.tanggalSelesai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
+                  {lembur.nomorSpkl && (
+                    <p className="text-xs text-on-surface-variant mt-0.5 font-mono">{lembur.nomorSpkl}</p>
+                  )}
                 </div>
                 <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
                   <span className={`flex items-center gap-1.5 font-label-bold text-xs px-3 py-1 rounded-full border-2 border-on-background ${cfg.color}`}>
