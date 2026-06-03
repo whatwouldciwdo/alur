@@ -20,10 +20,12 @@ function isInCidr(ip: string, cidr: string): boolean {
 
 function getOfficeRanges(): string[] {
   const raw = process.env.OFFICE_IP_RANGES ?? "";
-  return raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+function getOfficePublicIps(): string[] {
+  const raw = process.env.OFFICE_PUBLIC_IPS ?? "";
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 export function isOfficeIp(ip: string): boolean {
@@ -36,6 +38,15 @@ export function isOfficeIp(ip: string): boolean {
   }
 
   return ranges.some((cidr) => isInCidr(ip, cidr));
+}
+
+export function isOfficePublicIp(ip: string): boolean {
+  if (ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return true;
+
+  const publicIps = getOfficePublicIps();
+  if (publicIps.length === 0) return false;
+
+  return publicIps.includes(ip);
 }
 
 export function getClientIp(req: NextRequest): string {
