@@ -120,9 +120,11 @@ export default function AdminPage() {
   const [exporting, setExporting] = useState<"xlsx" | "pdf" | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
 
-  const [bulan, setBulan] = useState(getCurrentMonthValue());
+  const [bulan, setBulan] = useState("");
   const [bidang, setBidang] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const hasFilter = bulan !== "" || bidang !== "" || statusFilter !== "";
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -435,9 +437,24 @@ export default function AdminPage() {
 
       {/* ── Filter Bar ── */}
       <div className="w-full bg-surface-container-lowest border-2 border-on-background rounded-2xl p-5 hard-shadow mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={15} className="text-primary" />
-          <p className="font-label-bold text-label-bold text-on-surface uppercase text-xs">Filter Data</p>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2">
+            <Filter size={15} className="text-primary" />
+            <p className="font-label-bold text-label-bold text-on-surface uppercase text-xs">Filter Data</p>
+            {hasFilter && (
+              <span className="font-label-bold text-xs bg-primary text-on-primary px-2 py-0.5 rounded-full">
+                Aktif
+              </span>
+            )}
+          </div>
+          {hasFilter && (
+            <button
+              onClick={() => { setBulan(""); setBidang(""); setStatusFilter(""); }}
+              className="flex items-center gap-1 font-label-bold text-xs text-on-surface-variant border border-on-background/30 px-2.5 py-1 rounded-full hover:bg-surface-variant transition-colors"
+            >
+              <XCircle size={12} /> Reset Filter
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Filter Bulan */}
@@ -450,6 +467,7 @@ export default function AdminPage() {
               type="month"
               value={bulan}
               onChange={e => setBulan(e.target.value)}
+              placeholder="Semua bulan"
               className="bg-surface-variant border-2 border-on-background rounded-xl px-3 py-2.5 font-body-md text-sm text-on-surface focus:outline-none focus:border-primary transition-colors"
             />
           </div>
