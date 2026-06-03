@@ -35,7 +35,7 @@ export function validateGpsIntegrity(
 
   const now = Date.now();
   const age = now - timestamp;
-  if (age < 0) return { valid: false, reason: "future_timestamp" };
+  if (age < -60_000) return { valid: false, reason: "future_timestamp" };
   if (age > 30_000) return { valid: false, reason: "stale_location" };
 
   return { valid: true };
