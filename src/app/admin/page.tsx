@@ -118,6 +118,7 @@ export default function AdminPage() {
   const [lemburs, setLemburs] = useState<LemburItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<"xlsx" | "pdf" | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const [bulan, setBulan] = useState(getCurrentMonthValue());
   const [bidang, setBidang] = useState("");
@@ -162,6 +163,39 @@ export default function AdminPage() {
   const totalPending = lemburs.filter(l => l.status === "PENDING").length;
   const totalRejected = lemburs.filter(l => l.status === "REJECTED").length;
   const uniqueUsers = new Set(lemburs.map(l => l.user.nip)).size;
+  // Count total approval steps that have been approved across all lemburs
+  const totalStepsApproved = lemburs.reduce((acc, l) => acc + l.approvals.filter(a => a.status === "APPROVED").length, 0);
+
+  async function handleAdminApprove(lemburId: string) {
+    setApprovingId(lemburId);
+    try {
+      const res = await fetch("/api/admin/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lemburId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Gagal menyetujui lembur");
+        return;
+      }
+      await fetchData();
+    } catch {
+      alert("Terjadi kesalahan saat menyetujui");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
+  // Helper: check if this lembur is waiting for Admin to approve (current step role = ADMIN)
+  function isAdminTurn(l: LemburItem): boolean {
+    if (l.status !== "PENDING") return false;
+    const currentApproval = l.approvals.find(a => a.step === l.currentStep && a.status === "PENDING");
+    if (!currentApproval) return false;
+    // Check by approver role OR by roleName (in case approverId hasn't been updated yet)
+    return currentApproval.approver?.role === "ADMIN" || currentApproval.roleName?.toLowerCase().includes("admin");
+  }
+
 
   async function handleExportXlsx() {
     setExporting("xlsx");
@@ -370,6 +404,15 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
+            onClick={fetchData}
+            disabled={loading}
+            id="btn-refresh"
+            title="Refresh data"
+            className="flex items-center gap-2 bg-surface-container-lowest text-on-surface font-label-bold text-xs rounded-full px-3 py-2.5 border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+          </button>
+          <button
             onClick={handleExportXlsx}
             disabled={exporting !== null || lemburs.length === 0}
             id="btn-export-xlsx"
@@ -457,8 +500,9 @@ export default function AdminPage() {
             icon={<Download size={22} className="text-on-primary" />}
           />
           <StatCard
-            label="Disetujui"
+            label="Fully Disetujui"
             value={totalApproved}
+            sub={totalStepsApproved > 0 ? `${totalStepsApproved} step approved` : undefined}
             color="bg-emerald-100"
             icon={<CheckCircle size={22} className="text-emerald-700" />}
           />
@@ -468,13 +512,22 @@ export default function AdminPage() {
             color="bg-amber-100"
             icon={<Clock size={22} className="text-amber-700" />}
           />
-          <StatCard
-            label="Pegawai"
-            value={uniqueUsers}
-            sub="orang terlibat"
-            color="bg-secondary-container"
-            icon={<Users size={22} className="text-on-secondary-container" />}
-          />
+          {totalRejected > 0 ? (
+            <StatCard
+              label="Ditolak"
+              value={totalRejected}
+              color="bg-red-100"
+              icon={<XCircle size={22} className="text-red-700" />}
+            />
+          ) : (
+            <StatCard
+              label="Pegawai"
+              value={uniqueUsers}
+              sub="orang terlibat"
+              color="bg-secondary-container"
+              icon={<Users size={22} className="text-on-secondary-container" />}
+            />
+          )}
         </div>
       )}
 
@@ -563,17 +616,38 @@ export default function AdminPage() {
                               Tahap {l.currentStep}/{l.totalSteps}
                             </p>
                           )}
+                          {isAdminTurn(l) && (
+                            <span className="inline-flex items-center gap-1 font-label-bold text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 mt-1">
+                              <CheckCircle size={11} /> Giliran Admin
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
-                          <Link
-                            href={`/lembur/${l.id}`}
-                            className="flex items-center justify-center w-8 h-8 rounded-full bg-surface-variant border-2 border-on-background hover:bg-primary hover:text-on-primary transition-colors"
-                            title="Lihat Detail"
-                          >
-                            <ChevronRight size={16} />
-                          </Link>
+                          <div className="flex items-center gap-1.5">
+                            {isAdminTurn(l) && (
+                              <button
+                                onClick={() => handleAdminApprove(l.id)}
+                                disabled={approvingId === l.id}
+                                title="Setujui & Rekap"
+                                className="flex items-center gap-1 font-label-bold text-xs bg-emerald-600 text-white px-2.5 py-1.5 rounded-full border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+                              >
+                                {approvingId === l.id
+                                  ? <RefreshCw size={12} className="animate-spin" />
+                                  : <CheckCircle size={12} />}
+                                Rekap
+                              </button>
+                            )}
+                            <Link
+                              href={`/lembur/${l.id}`}
+                              className="flex items-center justify-center w-8 h-8 rounded-full bg-surface-variant border-2 border-on-background hover:bg-primary hover:text-on-primary transition-colors"
+                              title="Lihat Detail"
+                            >
+                              <ChevronRight size={16} />
+                            </Link>
+                          </div>
                         </td>
                       </tr>
+
                     );
                   })}
                 </tbody>
@@ -586,10 +660,9 @@ export default function AdminPage() {
             {lemburs.map((l, idx) => {
               const cfg = STATUS_CFG[l.status] ?? STATUS_CFG.DRAFT;
               return (
-                <Link
+                <div
                   key={l.id}
-                  href={`/lembur/${l.id}`}
-                  className="w-full bg-surface-container-lowest border-2 border-on-background rounded-2xl p-4 hard-shadow hard-shadow-hover transition-all block"
+                  className="w-full bg-surface-container-lowest border-2 border-on-background rounded-2xl p-4 hard-shadow transition-all"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1 min-w-0">
@@ -619,7 +692,27 @@ export default function AdminPage() {
                     );
                     return <p className="text-xs text-on-surface line-clamp-2">{l.deskripsi}</p>;
                   })()}
-                </Link>
+                  <div className="flex items-center gap-2 mt-3">
+                    {isAdminTurn(l) && (
+                      <button
+                        onClick={() => handleAdminApprove(l.id)}
+                        disabled={approvingId === l.id}
+                        className="flex items-center gap-1.5 font-label-bold text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-full border-2 border-on-background hard-shadow hard-shadow-active transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {approvingId === l.id
+                          ? <RefreshCw size={12} className="animate-spin" />
+                          : <CheckCircle size={12} />}
+                        Rekap & Setujui
+                      </button>
+                    )}
+                    <Link
+                      href={`/lembur/${l.id}`}
+                      className="flex items-center gap-1 font-label-bold text-xs text-on-surface-variant border border-on-background/30 px-3 py-1.5 rounded-full hover:bg-surface-variant transition-colors"
+                    >
+                      <ChevronRight size={13} /> Detail
+                    </Link>
+                  </div>
+                </div>
               );
             })}
           </div>
