@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowLeft, Clock, CheckCircle, Upload, X, Timer, Building2 } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle, Upload, X, Timer, Building2, WifiOff, ShieldAlert } from "lucide-react";
 
 const LS_KEY = "alur_lembur_draft";
 
@@ -35,6 +35,22 @@ export default function AjukanLembur() {
   const [clockOut, setClockOut] = useState<Date | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
 
+  type IpStatus = "loading" | "office" | "outside" | "bypass";
+  const [ipStatus, setIpStatus] = useState<IpStatus>("loading");
+
+  useEffect(() => {
+    fetch("/api/check-ip")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.bypass) setIpStatus("bypass");
+        else if (data.isOffice) setIpStatus("office");
+        else setIpStatus("outside");
+      })
+      .catch(() => setIpStatus("outside"));
+  }, []);
+
+  const isBlocked = ipStatus === "outside";
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -63,10 +79,10 @@ export default function AjukanLembur() {
   }, [clockIn, clockOut]);
 
   const handleClockIn = () => {
-    if (!clockIn) setClockIn(new Date());
+    if (!clockIn && !isBlocked) setClockIn(new Date());
   };
   const handleClockOut = () => {
-    if (clockIn && !clockOut) setClockOut(new Date());
+    if (clockIn && !clockOut && !isBlocked) setClockOut(new Date());
   };
   const confirmReset = () => {
     setClockIn(null);
@@ -179,6 +195,42 @@ export default function AjukanLembur() {
         </div>
       </div>
 
+      {/* ── IP Restriction Warning Banner ── */}
+      {ipStatus === "loading" && (
+        <div className="w-full max-w-3xl mb-4 flex items-center gap-3 bg-surface-variant border-2 border-on-background rounded-2xl px-5 py-3 hard-shadow">
+          <div className="w-4 h-4 rounded-full border-2 border-on-surface-variant border-t-transparent animate-spin shrink-0" />
+          <p className="font-label-bold text-xs uppercase text-on-surface-variant">Memeriksa jaringan...</p>
+        </div>
+      )}
+      {ipStatus === "outside" && (
+        <div className="w-full max-w-3xl mb-4 border-2 border-on-background rounded-2xl hard-shadow overflow-hidden">
+          <div className="bg-error flex items-center gap-3 px-5 py-3">
+            <div className="w-9 h-9 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center shrink-0">
+              <WifiOff size={18} className="text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-label-bold text-sm text-white uppercase tracking-wide">Jaringan Tidak Diizinkan</p>
+              <p className="font-body-md text-xs text-white/80 mt-0.5">
+                Clock In, Clock Out, dan Submit hanya dapat dilakukan dari jaringan kantor.
+              </p>
+            </div>
+            <ShieldAlert size={22} className="text-white/60 shrink-0" />
+          </div>
+          <div className="bg-error-container px-5 py-2.5 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-error shrink-0" />
+            <p className="text-xs text-on-error-container">
+              Anda terdeteksi menggunakan jaringan di luar kantor. Hubungkan perangkat ke WiFi / LAN kantor lalu muat ulang halaman.
+            </p>
+          </div>
+        </div>
+      )}
+      {ipStatus === "bypass" && (
+        <div className="w-full max-w-3xl mb-4 flex items-center gap-3 bg-tertiary-container border-2 border-on-background rounded-2xl px-5 py-3 hard-shadow">
+          <ShieldAlert size={16} className="text-on-tertiary shrink-0" />
+          <p className="font-label-bold text-xs text-on-tertiary uppercase">Mode Admin — Pembatasan IP dinonaktifkan</p>
+        </div>
+      )}
+
       {/* ── Live Clock Banner ── */}
       <div className="w-full max-w-3xl mb-6 bg-primary text-on-primary border-2 border-on-background rounded-2xl hard-shadow px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -210,14 +262,16 @@ export default function AjukanLembur() {
           <button
             type="button"
             onClick={handleClockIn}
-            disabled={!!clockIn}
+            disabled={!!clockIn || isBlocked || ipStatus === "loading"}
             className={`mt-1 w-full rounded-full px-4 py-2 font-label-bold text-sm border-2 border-on-background transition-all hard-shadow-active
               ${clockIn
                 ? "bg-primary text-on-primary cursor-default"
-                : "bg-surface-container hard-shadow hard-shadow-hover hover:bg-primary hover:text-on-primary"
+                : isBlocked || ipStatus === "loading"
+                  ? "opacity-40 cursor-not-allowed bg-surface-container"
+                  : "bg-surface-container hard-shadow hard-shadow-hover hover:bg-primary hover:text-on-primary"
               }`}
           >
-            {clockIn ? <span className="flex items-center justify-center gap-1"><CheckCircle size={14}/> Tercatat</span> : "⏱ CLOCK IN"}
+            {clockIn ? <span className="flex items-center justify-center gap-1"><CheckCircle size={14}/> Tercatat</span> : isBlocked ? <span className="flex items-center justify-center gap-1"><WifiOff size={13}/> Tidak Tersedia</span> : "⏱ CLOCK IN"}
           </button>
         </div>
 
@@ -233,16 +287,16 @@ export default function AjukanLembur() {
           <button
             type="button"
             onClick={handleClockOut}
-            disabled={!clockIn || !!clockOut}
+            disabled={!clockIn || !!clockOut || isBlocked || ipStatus === "loading"}
             className={`mt-1 w-full rounded-full px-4 py-2 font-label-bold text-sm border-2 border-on-background transition-all hard-shadow-active
               ${clockOut
                 ? "bg-tertiary text-on-tertiary cursor-default"
-                : !clockIn
+                : !clockIn || isBlocked || ipStatus === "loading"
                   ? "opacity-40 cursor-not-allowed bg-surface-container"
                   : "bg-surface-container hard-shadow hard-shadow-hover hover:bg-tertiary hover:text-on-tertiary"
               }`}
           >
-            {clockOut ? <span className="flex items-center justify-center gap-1"><CheckCircle size={14}/> Tercatat</span> : "⏹ CLOCK OUT"}
+            {clockOut ? <span className="flex items-center justify-center gap-1"><CheckCircle size={14}/> Tercatat</span> : isBlocked ? <span className="flex items-center justify-center gap-1"><WifiOff size={13}/> Tidak Tersedia</span> : "⏹ CLOCK OUT"}
           </button>
         </div>
       </div>
@@ -463,7 +517,7 @@ export default function AjukanLembur() {
 
           <button
             type="submit"
-            disabled={isLoading || !clockIn || !clockOut}
+            disabled={isLoading || !clockIn || !clockOut || isBlocked || ipStatus === "loading"}
             className={`w-full font-label-bold text-label-bold rounded-full px-6 py-4 mt-2 border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
               kategori === "PIKET"
                 ? "bg-secondary text-on-secondary"
@@ -472,9 +526,14 @@ export default function AjukanLembur() {
           >
             {isLoading ? "MENGAJUKAN..." : `SUBMIT PENGAJUAN ${kategori}`}
           </button>
-          {(!clockIn || !clockOut) && (
+          {(!clockIn || !clockOut) && !isBlocked && (
             <p className="text-center text-xs text-on-surface-variant -mt-3">
               {!clockIn ? "⚠ Tekan Clock In untuk mulai" : "⚠ Tekan Clock Out untuk menyelesaikan"}
+            </p>
+          )}
+          {isBlocked && (
+            <p className="text-center text-xs text-error -mt-3 flex items-center justify-center gap-1">
+              <WifiOff size={11} /> Hubungkan ke jaringan kantor untuk mengaktifkan form
             </p>
           )}
         </form>

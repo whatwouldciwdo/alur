@@ -7,6 +7,7 @@ import { sendApprovalRequestEmail } from "@/lib/email";
 import { uploadEvidensi } from "@/lib/supabase";
 import { SubBidang, Kategori } from "@prisma/client";
 import crypto from "crypto";
+import { getClientIp, isOfficeIp, shouldBypassIpCheck } from "@/lib/ip";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -61,6 +62,17 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!shouldBypassIpCheck(session.user.role)) {
+      const clientIp = getClientIp(req);
+      if (!isOfficeIp(clientIp)) {
+        console.warn(`[POST /api/lembur] Akses ditolak — IP: ${clientIp}, User: ${session.user.id}`);
+        return NextResponse.json(
+          { error: "Pengajuan hanya dapat dilakukan dari jaringan kantor." },
+          { status: 403 }
+        );
+      }
+    }
 
     const formData = await req.formData();
     const tanggalMulai   = formData.get("tanggalMulai") as string;
