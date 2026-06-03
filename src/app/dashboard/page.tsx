@@ -59,10 +59,10 @@ function ApprovalProgressCard({ lembur }: { lembur: Lembur }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
               {lembur.kategori && (
-                <span className={`font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/30 ${
+                <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-label-bold text-xs px-2.5 py-0.5 rounded-full border border-on-background/30 ${
                   lembur.kategori === "PIKET"
-                    ? "bg-secondary/20 text-on-secondary"
-                    : "bg-primary-container/60 text-on-primary"
+                    ? "bg-amber-600 text-white"
+                    : "bg-blue-600 text-white"
                 }`}>
                   {lembur.kategori === "PIKET" ? <><Building2 size={11} /> Piket</> : <><Timer size={11} /> Lembur</>}
                 </span>

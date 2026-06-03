@@ -158,7 +158,7 @@ export default function AjukanLembur() {
               onClick={() => setKategori("LEMBUR")}
               className={`flex items-center gap-1.5 px-5 py-2 font-label-bold text-sm transition-all ${
                 kategori === "LEMBUR"
-                  ? "bg-primary text-on-primary"
+                  ? "bg-blue-600 text-white"
                   : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
               }`}
             >
@@ -169,7 +169,7 @@ export default function AjukanLembur() {
               onClick={() => setKategori("PIKET")}
               className={`flex items-center gap-1.5 px-5 py-2 font-label-bold text-sm transition-all ${
                 kategori === "PIKET"
-                  ? "bg-secondary text-on-secondary"
+                  ? "bg-amber-600 text-white"
                   : "bg-surface-container-lowest text-on-surface hover:bg-surface-variant"
               }`}
             >

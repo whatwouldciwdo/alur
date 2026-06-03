@@ -632,8 +632,10 @@ export default function AdminPage() {
                           <p className="text-xs text-on-surface-variant">{l.user.jenjangJabatan}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 font-label-bold text-xs px-2 py-0.5 rounded-full border border-on-background/20 ${
-                            l.kategori === "PIKET" ? "bg-secondary/10 text-on-secondary" : "bg-primary-container/40 text-on-primary"
+                          <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-label-bold text-xs px-2 py-0.5 rounded-full border ${
+                            l.kategori === "PIKET"
+                              ? "bg-amber-50 border-amber-200 text-amber-700"
+                              : "bg-blue-50 border-blue-200 text-blue-700"
                           }`}>
                           {l.kategori === "PIKET"
                             ? <><Building2 size={11} /> Piket</>

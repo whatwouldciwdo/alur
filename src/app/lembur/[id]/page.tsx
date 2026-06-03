@@ -98,10 +98,10 @@ export default function DetailLembur({ params }: { params: Promise<{ id: string 
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             {lembur.kategori && (
-              <span className={`font-label-bold text-xs px-3 py-1.5 rounded-full border-2 border-on-background ${
+              <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-label-bold text-xs px-3.5 py-1.5 rounded-full border-2 border-on-background ${
                 lembur.kategori === "PIKET"
-                  ? "bg-secondary text-on-secondary"
-                  : "bg-primary-container text-on-primary"
+                  ? "bg-amber-600 text-white"
+                  : "bg-blue-600 text-white"
               }`}>
                 {lembur.kategori === "PIKET" ? <><Building2 size={12} /> PIKET</> : <><Timer size={12} /> LEMBUR</>}
               </span>
