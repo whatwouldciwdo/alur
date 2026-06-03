@@ -7,7 +7,7 @@ import { sendApprovalRequestEmail } from "@/lib/email";
 import { uploadEvidensi } from "@/lib/supabase";
 import { SubBidang, Kategori } from "@prisma/client";
 import crypto from "crypto";
-import { isOfficeIp, isOfficePublicIp, getClientIp, shouldBypassIpCheck } from "@/lib/ip";
+import { isWithinOffice, verifyLocationToken, isTokenExpired, shouldBypassLocationCheck } from "@/lib/location";
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -62,13 +62,23 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!shouldBypassIpCheck(session.user.role)) {
-      const localIp = req.headers.get("x-local-ip") ?? "";
-      const publicIp = getClientIp(req);
-      if (!isOfficeIp(localIp) && !isOfficePublicIp(publicIp)) {
-        console.warn(`[POST /api/lembur] Akses ditolak — localIp: "${localIp}", publicIp: "${publicIp}", User: ${session.user.id}`);
+    if (!shouldBypassLocationCheck(session.user.role)) {
+      const locHeader = req.headers.get("x-location-token") ?? "";
+      const locLat = parseFloat(req.headers.get("x-location-lat") ?? "");
+      const locLng = parseFloat(req.headers.get("x-location-lng") ?? "");
+      const locTs = parseInt(req.headers.get("x-location-ts") ?? "", 10);
+
+      const tokenValid =
+        locHeader &&
+        !isNaN(locLat) && !isNaN(locLng) && !isNaN(locTs) &&
+        !isTokenExpired(locTs) &&
+        verifyLocationToken(locLat, locLng, session.user.id, locTs, locHeader) &&
+        isWithinOffice(locLat, locLng);
+
+      if (!tokenValid) {
+        console.warn(`[POST /api/lembur] Lokasi tidak valid — User: ${session.user.id}`);
         return NextResponse.json(
-          { error: "Pengajuan hanya dapat dilakukan dari jaringan kantor." },
+          { error: "Pengajuan hanya dapat dilakukan dari lokasi kantor." },
           { status: 403 }
         );
       }
