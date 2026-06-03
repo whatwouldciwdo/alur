@@ -45,44 +45,49 @@ export default function AjukanLembur() {
       setLocStatus("gps_error");
       return;
     }
+    const opts: PositionOptions = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-        const timestamp = Date.now();
+      (pos1) => {
+        const { latitude: lat1, longitude: lng1, accuracy: acc1 } = pos1.coords;
+        if (acc1 <= 0 || acc1 < 1) { setLocStatus("fake_detected"); return; }
 
-        if (accuracy <= 0 || accuracy < 1) {
-          setLocStatus("fake_detected");
-          return;
-        }
-
-        const res = await fetch("/api/check-location", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lat, lng, accuracy, timestamp }),
-        }).catch(() => null);
-
-        if (!res) { setLocStatus("gps_error"); return; }
-        const data = await res.json();
-
-        if (data.bypass) {
-          setLocStatus("bypass");
-          setLocationToken(data.token);
-          setLocationCoords({ lat: 0, lng: 0, ts: Date.now() });
-        } else if (res.status === 422) {
-          setLocStatus("fake_detected");
-        } else if (data.isOffice) {
-          setLocStatus("office");
-          setLocationToken(data.token);
-          setLocationCoords({ lat, lng, ts: timestamp });
-        } else {
-          setLocStatus("outside");
-        }
+        setTimeout(() => {
+          navigator.geolocation.getCurrentPosition(
+            async (pos2) => {
+              const { latitude: lat2, longitude: lng2, accuracy: acc2 } = pos2.coords;
+              if (lat1 === lat2 && lng1 === lng2 && acc1 === acc2) {
+                setLocStatus("fake_detected");
+                return;
+              }
+              const timestamp = Date.now();
+              const res = await fetch("/api/check-location", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lat: lat2, lng: lng2, accuracy: acc2, timestamp }),
+              }).catch(() => null);
+              if (!res) { setLocStatus("gps_error"); return; }
+              const data = await res.json();
+              if (data.bypass) {
+                setLocStatus("bypass"); setLocationToken(data.token); setLocationCoords({ lat: 0, lng: 0, ts: Date.now() });
+              } else if (res.status === 422) {
+                setLocStatus("fake_detected");
+              } else if (data.isOffice) {
+                setLocStatus("office"); setLocationToken(data.token); setLocationCoords({ lat: lat2, lng: lng2, ts: timestamp });
+              } else {
+                setLocStatus("outside");
+              }
+            },
+            () => setLocStatus("gps_error"),
+            opts
+          );
+        }, 2000);
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) setLocStatus("permission_denied");
         else setLocStatus("gps_error");
       },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+      opts
     );
   }, []);
 
