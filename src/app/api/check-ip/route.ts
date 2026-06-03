@@ -19,5 +19,16 @@ export async function GET(req: NextRequest) {
 
   const isOffice = isOfficeIp(localIp) || isOfficePublicIp(publicIp);
 
-  return NextResponse.json({ isOffice, bypass: false });
+  return NextResponse.json({
+    isOffice,
+    bypass: false,
+    debug: {
+      localIp: localIp || null,
+      publicIp,
+      officeRanges: process.env.OFFICE_IP_RANGES ?? "(tidak diset)",
+      officePublicIps: process.env.OFFICE_PUBLIC_IPS ?? "(tidak diset)",
+      localIpMatch: isOfficeIp(localIp),
+      publicIpMatch: isOfficePublicIp(publicIp),
+    },
+  });
 }
