@@ -22,6 +22,7 @@ interface UserRow {
   emailPersonal: string | null;
   phone: string | null;
   tlGroup: string | null;
+  tipeKerja: "SHIFT" | "NON_SHIFT";
   createdAt: string;
   _count: { lemburs: number };
 }
@@ -98,14 +99,13 @@ const labelCls = "font-label-bold text-xs uppercase text-on-surface-variant mb-1
 const sectionTitle = "font-label-bold text-xs uppercase text-primary mb-3 flex items-center gap-1.5";
 
 // ─── Shift/Non-Shift badge ───
-const SHIFT_SUB_BIDANG = ["OPERATOR_SHIFT"];
-
-function isShift(subBidang: string) {
-  return SHIFT_SUB_BIDANG.includes(subBidang);
+// Gunakan field tipeKerja dari database (bukan hanya subBidang)
+function isShift(user: UserRow) {
+  return user.tipeKerja === "SHIFT";
 }
 
-function ShiftBadge({ subBidang }: { subBidang: string }) {
-  if (isShift(subBidang)) {
+function ShiftBadge({ user }: { user: UserRow }) {
+  if (isShift(user)) {
     return (
       <span className="inline-flex items-center gap-1 font-label-bold text-xs px-2.5 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-300">
         <Moon size={11} /> SHIFT
@@ -129,7 +129,7 @@ function checkCompleteness(u: UserRow): CompletenessResult {
   const fields: { label: string; ok: boolean }[] = [
     { label: "Email Personal", ok: !!u.emailPersonal },
     { label: "No. HP",        ok: !!u.phone },
-    { label: "TL Group",      ok: isShift(u.subBidang) ? !!u.tlGroup : true },
+    { label: "TL Group",      ok: isShift(u) ? !!u.tlGroup : true },
   ];
   const missing = fields.filter(f => !f.ok).map(f => f.label);
   const score   = Math.round(((fields.length - missing.length) / fields.length) * 100);
@@ -616,16 +616,16 @@ export default function SuperAdminPage() {
 
   // Apply client-side shift + completeness filters
   const displayedUsers = users.filter(u => {
-    if (shiftFilter === "SHIFT"     && !isShift(u.subBidang)) return false;
-    if (shiftFilter === "NON_SHIFT" &&  isShift(u.subBidang)) return false;
+    if (shiftFilter === "SHIFT"     && !isShift(u)) return false;
+    if (shiftFilter === "NON_SHIFT" &&  isShift(u)) return false;
     const { score } = checkCompleteness(u);
     if (completenessFilter === "LENGKAP"      && score !== 100)  return false;
     if (completenessFilter === "TIDAK_LENGKAP" && score === 100) return false;
     return true;
   });
 
-  const totalShift    = users.filter(u =>  isShift(u.subBidang)).length;
-  const totalNonShift = users.filter(u => !isShift(u.subBidang)).length;
+  const totalShift    = users.filter(u =>  isShift(u)).length;
+  const totalNonShift = users.filter(u => !isShift(u)).length;
   const totalLengkap  = users.filter(u => checkCompleteness(u).score === 100).length;
 
   if (sessionStatus === "loading" || !session) {
@@ -796,8 +796,8 @@ export default function SuperAdminPage() {
                       </td>
                       {/* Shift/Non-Shift badge */}
                       <td className="px-4 py-3">
-                        <ShiftBadge subBidang={u.subBidang} />
-                        {isShift(u.subBidang) && u.tlGroup && (
+                        <ShiftBadge user={u} />
+                        {isShift(u) && u.tlGroup && (
                           <p className="text-xs text-on-surface-variant mt-1">Grup {u.tlGroup}</p>
                         )}
                       </td>
@@ -843,9 +843,9 @@ export default function SuperAdminPage() {
                 <p className="text-xs text-on-surface-variant mb-1">{u.bidang.replace("_", " & ")} — {u.subBidang.replace(/_/g, " ")}</p>
                 {/* Shift + Completeness badges */}
                 <div className="flex items-center gap-2 flex-wrap mt-2 mb-2">
-                  <ShiftBadge subBidang={u.subBidang} />
+                  <ShiftBadge user={u} />
                   <CompletenessBadge user={u} />
-                  {isShift(u.subBidang) && u.tlGroup && (
+                  {isShift(u) && u.tlGroup && (
                     <span className="font-label-bold text-xs text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full border border-on-background/20">
                       Grup {u.tlGroup}
                     </span>

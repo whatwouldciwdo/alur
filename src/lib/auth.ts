@@ -49,6 +49,7 @@ export const authOptions: NextAuthOptions = {
             subBidang: user.subBidang,
             jenjangJabatan: user.jenjangJabatan,
             tlGroup: user.tlGroup ?? undefined,
+            tipeKerja: user.tipeKerja,
           };
         } catch (err) {
           console.error("[auth] ERROR in authorize:", err);
@@ -67,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.subBidang = (user as any).subBidang;
         token.jenjangJabatan = (user as any).jenjangJabatan;
         token.tlGroup = (user as any).tlGroup;
+        token.tipeKerja = (user as any).tipeKerja;
       }
       return token;
     },
@@ -78,6 +80,7 @@ export const authOptions: NextAuthOptions = {
       session.user.subBidang = token.subBidang as string;
       session.user.jenjangJabatan = token.jenjangJabatan as string;
       session.user.tlGroup = token.tlGroup as string | undefined;
+      (session.user as any).tipeKerja = token.tipeKerja as string | undefined;
       return session;
     },
   },

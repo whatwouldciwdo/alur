@@ -42,6 +42,11 @@ enum SubBidang {
   ADMIN_SEKRETARIS
 }
 
+enum TipeKerja {
+  SHIFT
+  NON_SHIFT
+}
+
 enum LemburStatus {
   DRAFT
   PENDING
@@ -75,6 +80,7 @@ model User {
   phone           String?
   password        String
   tlGroup         String?
+  tipeKerja       TipeKerja  @default(NON_SHIFT)
 
   lemburs         Lembur[]   @relation("PegawaiLembur")
   approvals       Approval[] @relation("ApproverApproval")

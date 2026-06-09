@@ -22,7 +22,8 @@ export async function GET(
     select: {
       id: true, nip: true, nama: true, jenjangJabatan: true,
       bidang: true, subBidang: true, role: true,
-      emailPerusahaan: true, emailPersonal: true, phone: true, tlGroup: true,
+      emailPerusahaan: true, emailPersonal: true, phone: true,
+      tlGroup: true, tipeKerja: true,
     },
   });
 
@@ -67,6 +68,7 @@ export async function PATCH(
   if (emailPersonal   !== undefined) data.emailPersonal   = emailPersonal;
   if (phone           !== undefined) data.phone           = phone;
   if (tlGroup         !== undefined) data.tlGroup         = tlGroup;
+  if (body.tipeKerja  !== undefined) data.tipeKerja       = body.tipeKerja;
   if (newPassword)                   data.password        = await bcrypt.hash(newPassword, 10);
 
   const updated = await prisma.user.update({
@@ -75,7 +77,8 @@ export async function PATCH(
     select: {
       id: true, nip: true, nama: true, jenjangJabatan: true,
       bidang: true, subBidang: true, role: true,
-      emailPerusahaan: true, emailPersonal: true, phone: true, tlGroup: true,
+      emailPerusahaan: true, emailPersonal: true, phone: true,
+      tlGroup: true, tipeKerja: true,
     },
   });
 

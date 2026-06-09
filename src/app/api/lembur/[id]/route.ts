@@ -125,7 +125,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (nextApproval?.token) {
       await sendApprovalRequestEmail({
-        to:            nextApprover.emailPerusahaan || nextApprover.emailPersonal,
+        to:            nextApprover.emailPerusahaan ?? nextApprover.emailPersonal ?? "",
         approverName:  nextApprover.nama,
         pegawaiName:   lembur.user.nama,
         subBidang:     lembur.user.subBidang,

@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
       emailPersonal:   true,
       phone:           true,
       tlGroup:         true,
+      tipeKerja:       true,
       createdAt:       true,
       _count: { select: { lemburs: true } },
     },
@@ -88,12 +89,14 @@ export async function POST(req: NextRequest) {
       emailPersonal:   emailPersonal || null,
       phone:           phone || null,
       tlGroup:         tlGroup || null,
+      tipeKerja:       (body.tipeKerja ?? "NON_SHIFT") as any,
       password:        hashed,
     },
     select: {
       id: true, nip: true, nama: true, jenjangJabatan: true,
       bidang: true, subBidang: true, role: true,
-      emailPerusahaan: true, emailPersonal: true, phone: true, tlGroup: true,
+      emailPerusahaan: true, emailPersonal: true, phone: true,
+      tlGroup: true, tipeKerja: true,
       createdAt: true, _count: { select: { lemburs: true } },
     },
   });

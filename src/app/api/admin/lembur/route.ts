@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
           subBidang: true,
           emailPerusahaan: true,
           tlGroup: true,
+          tipeKerja: true,
         },
       },
       approvals: {

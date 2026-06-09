@@ -22,6 +22,8 @@ import {
   Timer,
   Building2,
   FileDown,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 interface Approval {
@@ -53,6 +55,7 @@ interface LemburItem {
     subBidang: string;
     emailPerusahaan: string;
     tlGroup: string | null;
+    tipeKerja: "SHIFT" | "NON_SHIFT";
   };
   approvals: Approval[];
 }
@@ -105,6 +108,21 @@ function getCurrentMonthValue() {
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
+}
+
+function ShiftBadge({ tipeKerja }: { tipeKerja: "SHIFT" | "NON_SHIFT" }) {
+  if (tipeKerja === "SHIFT") {
+    return (
+      <span className="inline-flex items-center gap-1 font-label-bold text-[10px] px-2 py-0.5 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-300">
+        <Moon size={9} /> SHIFT
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 font-label-bold text-[10px] px-2 py-0.5 rounded-full border bg-orange-50 text-orange-700 border-orange-300">
+      <Sun size={9} /> NON-SHIFT
+    </span>
+  );
 }
 
 function StatCard({ label, value, sub, color, icon }: {
@@ -678,6 +696,9 @@ export default function AdminPage() {
                           <p className="font-bold text-on-background text-sm">{l.user.nama}</p>
                           <p className="text-xs text-on-surface-variant">{l.user.nip}</p>
                           <p className="text-xs text-on-surface-variant">{l.user.jenjangJabatan}</p>
+                          <div className="mt-1">
+                            <ShiftBadge tipeKerja={l.user.tipeKerja} />
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-label-bold text-xs px-2 py-0.5 rounded-full border ${
@@ -797,6 +818,7 @@ export default function AdminPage() {
                         <span className="font-label-bold text-xs text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full border border-on-background/20">
                           {l.user.bidang.replace("_", " & ")}
                         </span>
+                        <ShiftBadge tipeKerja={l.user.tipeKerja} />
                       </div>
                       <p className="text-xs text-on-surface-variant">{l.user.nip} · {l.user.jenjangJabatan}</p>
                     </div>

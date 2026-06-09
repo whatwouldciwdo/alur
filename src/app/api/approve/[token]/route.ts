@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getWorkflowSteps, getNextStep } from "@/lib/workflow";
+import { getNextStep } from "@/lib/workflow";
 import {
   sendApprovalRequestEmail,
   sendApprovedEmail,
   sendRejectedEmail,
   sendRevisionEmail,
 } from "@/lib/email";
-import { generateLemburPdfServer } from "@/lib/generateLemburPdfServer";
 import { SubBidang } from "@prisma/client";
-import crypto from "crypto";
-
-function generateToken(): string {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-function tokenExpiry(): Date {
-  const d = new Date();
-  d.setDate(d.getDate() + 7);
-  return d;
-}
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
@@ -40,46 +28,22 @@ export async function GET(
               bidang: true,
               subBidang: true,
               emailPerusahaan: true,
+              emailPersonal: true,
+              tlGroup: true,
             },
           },
           approvals: {
-            include: {
-              approver: { select: { nama: true, role: true, jenjangJabatan: true } },
-            },
+            include: { approver: { select: { nama: true, role: true, jenjangJabatan: true } } },
             orderBy: { step: "asc" },
           },
         },
       },
-      approver: { select: { nama: true, role: true } },
+      approver: { select: { nama: true, role: true, jenjangJabatan: true } },
     },
   });
 
-  if (!approval) {
-    return NextResponse.json({ error: "Link tidak valid atau sudah kedaluwarsa." }, { status: 404 });
-  }
-  if (approval.expiresAt && approval.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Link sudah kedaluwarsa (lebih dari 7 hari)." }, { status: 410 });
-  }
-  if (approval.tokenUsedAt) {
-    return NextResponse.json({ error: "Link ini sudah digunakan sebelumnya." }, { status: 410 });
-  }
-  if (approval.step !== approval.lembur.currentStep) {
-    return NextResponse.json({
-      error: approval.step < approval.lembur.currentStep
-        ? "Step ini sudah selesai diproses."
-        : "Belum giliran step ini untuk diproses.",
-    }, { status: 400 });
-  }
-
-  return NextResponse.json({
-    approval: {
-      id:           approval.id,
-      step:         approval.step,
-      roleName:     approval.roleName,
-      approverName: approval.approver.nama,
-    },
-    lembur: approval.lembur,
-  });
+  if (!approval) return NextResponse.json({ error: "Token tidak valid" }, { status: 404 });
+  return NextResponse.json(approval);
 }
 
 export async function POST(
@@ -88,53 +52,50 @@ export async function POST(
 ) {
   const { token } = await params;
   const body = await req.json();
-  const { action, catatan } = body as { action: "APPROVED" | "REJECTED" | "REVISED"; catatan?: string };
+  const { action, catatan } = body;
 
   if (!["APPROVED", "REJECTED", "REVISED"].includes(action)) {
-    return NextResponse.json({ error: "Action tidak valid." }, { status: 400 });
+    return NextResponse.json({ error: "Action tidak valid" }, { status: 400 });
   }
 
   const approval = await prisma.approval.findUnique({
     where: { token },
     include: {
-      lembur: {
-        include: { user: true, approvals: { orderBy: { step: "asc" } } },
-      },
       approver: { select: { nama: true } },
+      lembur: {
+        include: {
+          user: true,
+          approvals: { orderBy: { step: "asc" } },
+        },
+      },
     },
   });
 
-  if (!approval) return NextResponse.json({ error: "Link tidak valid." }, { status: 404 });
-  if (approval.expiresAt && approval.expiresAt < new Date())
-    return NextResponse.json({ error: "Link sudah kedaluwarsa." }, { status: 410 });
-  if (approval.tokenUsedAt)
-    return NextResponse.json({ error: "Link ini sudah digunakan." }, { status: 410 });
-  if (approval.lembur.status !== "PENDING")
-    return NextResponse.json({ error: "Lembur ini tidak dalam status menunggu." }, { status: 400 });
-  if (approval.step !== approval.lembur.currentStep)
-    return NextResponse.json({ error: "Bukan giliran step ini." }, { status: 400 });
+  if (!approval) return NextResponse.json({ error: "Token tidak valid" }, { status: 404 });
 
-  const lembur       = approval.lembur;
-  const approverName = approval.approver.nama;
+  const lembur = approval.lembur;
+
+  if (lembur.status !== "PENDING") {
+    return NextResponse.json({ error: "Lembur tidak dalam status pending" }, { status: 400 });
+  }
+
+  if (approval.status !== "PENDING") {
+    return NextResponse.json({ error: "Approval ini sudah diproses" }, { status: 400 });
+  }
 
   await prisma.approval.update({
     where: { id: approval.id },
-    data: {
-      status:      action,
-      catatan:     catatan || null,
-      respondedAt: new Date(),
-      tokenUsedAt: new Date(),
-    },
+    data: { status: action, catatan, respondedAt: new Date() },
   });
 
   if (action === "REJECTED") {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "REJECTED" } });
     await sendRejectedEmail({
-      to:           lembur.user.emailPersonal || lembur.user.emailPerusahaan,
+      to:           lembur.user.emailPersonal ?? lembur.user.emailPerusahaan ?? "",
       pegawaiName:  lembur.user.nama,
-      rejectorName: approverName,
+      rejectorName: approval.approver?.nama ?? "Atasan",
       roleName:     approval.roleName,
-      catatan:      catatan || undefined,
+      catatan,
       tanggalMulai: lembur.tanggalMulai,
     });
     return NextResponse.json({ success: true, status: "REJECTED" });
@@ -143,68 +104,27 @@ export async function POST(
   if (action === "REVISED") {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "REVISED", currentStep: 0 } });
     await sendRevisionEmail({
-      to:          lembur.user.emailPersonal || lembur.user.emailPerusahaan,
+      to:          lembur.user.emailPersonal ?? lembur.user.emailPerusahaan ?? "",
       pegawaiName: lembur.user.nama,
-      revisorName: approverName,
+      revisorName: approval.approver?.nama ?? "Atasan",
       roleName:    approval.roleName,
-      catatan:     catatan || undefined,
+      catatan,
       tanggalMulai: lembur.tanggalMulai,
     });
     return NextResponse.json({ success: true, status: "REVISED" });
   }
 
-  // Admin (perekap) lembur hanya punya 1 step (Branch Manager) — langsung APPROVED setelahnya
+  // APPROVED — advance to next step
   const subBidang = lembur.user.subBidang as SubBidang;
-  const nextStep  = lembur.user.role === "ADMIN" ? null : getNextStep(subBidang, lembur.currentStep);
+  const nextStep  = getNextStep(subBidang, lembur.currentStep);
 
   if (!nextStep) {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "APPROVED" } });
-
-    // Fetch full lembur data with respondedAt for PDF
-    let pdfAttachment: { buffer: Buffer; filename: string } | undefined;
-    try {
-      const fullLembur = await prisma.lembur.findUnique({
-        where: { id: lembur.id },
-        include: {
-          user: { select: { nama: true, nip: true, jenjangJabatan: true, bidang: true, subBidang: true, tlGroup: true } },
-          approvals: {
-            include: { approver: { select: { nama: true, role: true, jenjangJabatan: true } } },
-            orderBy: { step: "asc" },
-          },
-        },
-      });
-      if (fullLembur) {
-        pdfAttachment = await generateLemburPdfServer({
-          id:             fullLembur.id,
-          nomorSpkl:      fullLembur.nomorSpkl,
-          status:         fullLembur.status,
-          kategori:       fullLembur.kategori ?? "LEMBUR",
-          tanggalMulai:   fullLembur.tanggalMulai,
-          tanggalSelesai: fullLembur.tanggalSelesai,
-          deskripsi:      fullLembur.deskripsi,
-          penugas:        fullLembur.penugas,
-          evidentUrl:     fullLembur.evidentUrl,
-          submittedAt:    fullLembur.submittedAt ?? new Date(),
-          user:           fullLembur.user as any,
-          approvals:      fullLembur.approvals.map(a => ({
-            step:        a.step,
-            roleName:    a.roleName,
-            status:      a.status,
-            respondedAt: a.respondedAt as Date | string | null,
-            approver:    a.approver as any,
-          })),
-        });
-      }
-    } catch (pdfErr) {
-      console.error("[approve] PDF generation failed (email will still send):", pdfErr);
-    }
-
     await sendApprovedEmail({
-      to:            lembur.user.emailPersonal || lembur.user.emailPerusahaan,
-      pegawaiName:   lembur.user.nama,
-      tanggalMulai:  lembur.tanggalMulai,
+      to:             lembur.user.emailPersonal ?? lembur.user.emailPerusahaan ?? "",
+      pegawaiName:    lembur.user.nama,
+      tanggalMulai:   lembur.tanggalMulai,
       tanggalSelesai: lembur.tanggalSelesai,
-      pdfAttachment,
     });
     return NextResponse.json({ success: true, status: "APPROVED" });
   }
@@ -224,16 +144,16 @@ export async function POST(
 
     if (nextApproval?.token) {
       await sendApprovalRequestEmail({
-        to:            nextApprover.emailPerusahaan || nextApprover.emailPersonal,
-        approverName:  nextApprover.nama,
-        pegawaiName:   lembur.user.nama,
-        subBidang:     lembur.user.subBidang,
-        tanggalMulai:  lembur.tanggalMulai,
+        to:             nextApprover.emailPerusahaan ?? nextApprover.emailPersonal ?? "",
+        approverName:   nextApprover.nama,
+        pegawaiName:    lembur.user.nama,
+        subBidang:      lembur.user.subBidang,
+        tanggalMulai:   lembur.tanggalMulai,
         tanggalSelesai: lembur.tanggalSelesai,
-        deskripsi:     lembur.deskripsi,
-        lemburId:      lembur.id,
-        roleName:      nextStep.roleName,
-        token:         nextApproval.token,
+        deskripsi:      lembur.deskripsi,
+        lemburId:       lembur.id,
+        roleName:       nextStep.roleName,
+        token:          nextApproval.token,
       });
     }
   }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { User, Lock, Phone, Mail, IdCard, Briefcase, Building2 } from "lucide-react";
+import { User, Lock, Phone, Mail, IdCard, Briefcase, Building2, Moon, Sun } from "lucide-react";
 
 export default function Profile() {
   const router = useRouter();
@@ -165,6 +165,22 @@ export default function Profile() {
                   type="text" disabled value={user.role ?? ""}
                   className="bg-surface-container-highest border border-on-background/30 rounded-lg px-3 py-2 font-body-md text-on-surface-variant cursor-not-allowed w-full text-sm"
                 />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-label-bold text-xs uppercase mb-1 flex items-center gap-1">
+                  {(user as any).tipeKerja === "SHIFT" ? <Moon size={11} /> : <Sun size={11} />} Kategori Kerja
+                </label>
+                <div className="flex items-center gap-2 mt-1">
+                  {(user as any).tipeKerja === "SHIFT" ? (
+                    <span className="inline-flex items-center gap-1.5 font-label-bold text-sm px-3 py-1.5 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-300">
+                      <Moon size={13} /> SHIFT
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 font-label-bold text-sm px-3 py-1.5 rounded-full border bg-orange-50 text-orange-700 border-orange-300">
+                      <Sun size={13} /> NON-SHIFT
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
