@@ -21,13 +21,15 @@ import {
   ShieldCheck,
   Timer,
   Building2,
+  FileDown,
 } from "lucide-react";
 
 interface Approval {
   step: number;
   roleName: string;
   status: string;
-  approver: { nama: string; role: string };
+  respondedAt: string | null;
+  approver: { nama: string; role: string; jenjangJabatan: string };
 }
 
 interface LemburItem {
@@ -39,6 +41,7 @@ interface LemburItem {
   tanggalSelesai: string;
   deskripsi: string;
   penugas: string | null;
+  evidentUrl: string | null;
   nomorSpkl?: string;
   kategori?: string;
   submittedAt: string;
@@ -49,6 +52,7 @@ interface LemburItem {
     bidang: string;
     subBidang: string;
     emailPerusahaan: string;
+    tlGroup: string | null;
   };
   approvals: Approval[];
 }
@@ -129,6 +133,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<"xlsx" | "pdf" | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [exportingLemburId, setExportingLemburId] = useState<string | null>(null);
 
   const [bulan, setBulan] = useState("");
   const [bidang, setBidang] = useState("");
@@ -210,6 +215,49 @@ export default function AdminPage() {
     return currentApproval.approver?.role === "ADMIN" || currentApproval.roleName?.toLowerCase().includes("admin");
   }
 
+
+  async function handleExportLemburPdf(l: LemburItem) {
+    if (l.status !== "APPROVED") return;
+    setExportingLemburId(l.id);
+    try {
+      const { generateLemburPdf } = await import("@/lib/generateLemburPdf");
+      await generateLemburPdf(
+        {
+          id:             l.id,
+          nomorSpkl:      l.nomorSpkl ?? null,
+          status:         l.status,
+          kategori:       l.kategori ?? "LEMBUR",
+          tanggalMulai:   l.tanggalMulai,
+          tanggalSelesai: l.tanggalSelesai,
+          deskripsi:      l.deskripsi,
+          penugas:        l.penugas,
+          evidentUrl:     l.evidentUrl,
+          submittedAt:    l.submittedAt,
+          user: {
+            nama:           l.user.nama,
+            nip:            l.user.nip,
+            jenjangJabatan: l.user.jenjangJabatan,
+            bidang:         l.user.bidang,
+            subBidang:      l.user.subBidang,
+            tlGroup:        l.user.tlGroup,
+          },
+          approvals: l.approvals.map(a => ({
+            step:        a.step,
+            roleName:    a.roleName,
+            status:      a.status,
+            respondedAt: a.respondedAt,
+            approver:    { nama: a.approver.nama, role: a.approver.role, jenjangJabatan: a.approver.jenjangJabatan },
+          })),
+        },
+        window.location.origin
+      );
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      alert("Gagal membuat PDF. Silakan coba lagi.");
+    } finally {
+      setExportingLemburId(null);
+    }
+  }
 
   async function handleExportXlsx() {
     setExporting("xlsx");
@@ -703,6 +751,18 @@ export default function AdminPage() {
                                 Rekap
                               </button>
                             )}
+                            {l.status === "APPROVED" && (
+                              <button
+                                onClick={() => handleExportLemburPdf(l)}
+                                disabled={exportingLemburId === l.id}
+                                title="Export SPKL PDF"
+                                className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white border-2 border-on-background hard-shadow hard-shadow-hover hard-shadow-active transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {exportingLemburId === l.id
+                                  ? <RefreshCw size={12} className="animate-spin" />
+                                  : <FileDown size={14} />}
+                              </button>
+                            )}
                             <Link
                               href={`/lembur/${l.id}`}
                               className="flex items-center justify-center w-8 h-8 rounded-full bg-surface-variant border-2 border-on-background hover:bg-primary hover:text-on-primary transition-colors"
@@ -758,7 +818,7 @@ export default function AdminPage() {
                     );
                     return <p className="text-xs text-on-surface line-clamp-2">{l.deskripsi}</p>;
                   })()}
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap">
                     {isAdminTurn(l) && (
                       <button
                         onClick={() => handleAdminApprove(l.id)}
@@ -769,6 +829,18 @@ export default function AdminPage() {
                           ? <RefreshCw size={12} className="animate-spin" />
                           : <CheckCircle size={12} />}
                         Rekap & Setujui
+                      </button>
+                    )}
+                    {l.status === "APPROVED" && (
+                      <button
+                        onClick={() => handleExportLemburPdf(l)}
+                        disabled={exportingLemburId === l.id}
+                        className="flex items-center gap-1.5 font-label-bold text-xs bg-blue-600 text-white px-3 py-1.5 rounded-full border-2 border-on-background hard-shadow hard-shadow-active transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {exportingLemburId === l.id
+                          ? <RefreshCw size={12} className="animate-spin" />
+                          : <FileDown size={12} />}
+                        Export SPKL
                       </button>
                     )}
                     <Link

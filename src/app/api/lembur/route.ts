@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getWorkflowSteps, getTotalSteps } from "@/lib/workflow";
+import { getWorkflowSteps, getTotalSteps, ADMIN_WORKFLOW } from "@/lib/workflow";
 import { sendApprovalRequestEmail } from "@/lib/email";
 import { uploadEvidensi } from "@/lib/supabase";
 import { SubBidang, Kategori } from "@prisma/client";
@@ -114,9 +114,10 @@ export async function POST(req: NextRequest) {
     }
 
     const tanggalMulaiDate = new Date(tanggalMulai);
+    const isAdminSubmitter  = user.role === "ADMIN";
     const subBidang  = user.subBidang as SubBidang;
-    const steps      = getWorkflowSteps(subBidang);
-    const totalSteps = getTotalSteps(subBidang);
+    const steps      = isAdminSubmitter ? ADMIN_WORKFLOW : getWorkflowSteps(subBidang);
+    const totalSteps = isAdminSubmitter ? ADMIN_WORKFLOW.length : getTotalSteps(subBidang);
     const nomorSpkl  = await generateNomorSpkl(tanggalMulaiDate);
 
     const lembur = await prisma.lembur.create({

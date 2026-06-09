@@ -7,6 +7,7 @@ import {
   sendRejectedEmail,
   sendRevisionEmail,
 } from "@/lib/email";
+import { generateLemburPdfServer } from "@/lib/generateLemburPdfServer";
 import { SubBidang } from "@prisma/client";
 import crypto from "crypto";
 
@@ -152,16 +153,58 @@ export async function POST(
     return NextResponse.json({ success: true, status: "REVISED" });
   }
 
+  // Admin (perekap) lembur hanya punya 1 step (Branch Manager) — langsung APPROVED setelahnya
   const subBidang = lembur.user.subBidang as SubBidang;
-  const nextStep  = getNextStep(subBidang, lembur.currentStep);
+  const nextStep  = lembur.user.role === "ADMIN" ? null : getNextStep(subBidang, lembur.currentStep);
 
   if (!nextStep) {
     await prisma.lembur.update({ where: { id: lembur.id }, data: { status: "APPROVED" } });
+
+    // Fetch full lembur data with respondedAt for PDF
+    let pdfAttachment: { buffer: Buffer; filename: string } | undefined;
+    try {
+      const fullLembur = await prisma.lembur.findUnique({
+        where: { id: lembur.id },
+        include: {
+          user: { select: { nama: true, nip: true, jenjangJabatan: true, bidang: true, subBidang: true, tlGroup: true } },
+          approvals: {
+            include: { approver: { select: { nama: true, role: true, jenjangJabatan: true } } },
+            orderBy: { step: "asc" },
+          },
+        },
+      });
+      if (fullLembur) {
+        pdfAttachment = await generateLemburPdfServer({
+          id:             fullLembur.id,
+          nomorSpkl:      fullLembur.nomorSpkl,
+          status:         fullLembur.status,
+          kategori:       fullLembur.kategori ?? "LEMBUR",
+          tanggalMulai:   fullLembur.tanggalMulai,
+          tanggalSelesai: fullLembur.tanggalSelesai,
+          deskripsi:      fullLembur.deskripsi,
+          penugas:        fullLembur.penugas,
+          evidentUrl:     fullLembur.evidentUrl,
+          submittedAt:    fullLembur.submittedAt ?? new Date(),
+          user:           fullLembur.user as any,
+          approvals:      fullLembur.approvals.map(a => ({
+            step:        a.step,
+            roleName:    a.roleName,
+            status:      a.status,
+            respondedAt: a.respondedAt as Date | string | null,
+            approver:    a.approver as any,
+          })),
+        });
+      }
+    } catch (pdfErr) {
+      console.error("[approve] PDF generation failed (email will still send):", pdfErr);
+    }
+
     await sendApprovedEmail({
       to:            lembur.user.emailPersonal || lembur.user.emailPerusahaan,
       pegawaiName:   lembur.user.nama,
       tanggalMulai:  lembur.tanggalMulai,
       tanggalSelesai: lembur.tanggalSelesai,
+      pdfAttachment,
     });
     return NextResponse.json({ success: true, status: "APPROVED" });
   }

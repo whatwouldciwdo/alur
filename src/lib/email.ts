@@ -20,15 +20,17 @@ interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  attachments?: { filename: string; content: Buffer; contentType: string }[];
 }
 
-async function sendEmail({ to, subject, html }: EmailOptions) {
+async function sendEmail({ to, subject, html, attachments }: EmailOptions) {
   try {
     await transporter.sendMail({
       from: `"ALUR - Absen Lembur Ranger" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       html,
+      attachments,
     });
   } catch (error) {
     console.error("Failed to send email:", error);
@@ -143,11 +145,13 @@ export async function sendApprovedEmail({
   pegawaiName,
   tanggalMulai,
   tanggalSelesai,
+  pdfAttachment,
 }: {
   to: string;
   pegawaiName: string;
   tanggalMulai: Date;
   tanggalSelesai: Date;
+  pdfAttachment?: { buffer: Buffer; filename: string };
 }) {
   const html = baseTemplate(`
     <span class="badge">✓ LEMBUR DISETUJUI</span>
@@ -157,13 +161,17 @@ export async function sendApprovedEmail({
       <div class="info-row"><span class="info-label">Tanggal Mulai</span><span class="info-value">: ${new Date(tanggalMulai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span></div>
       <div class="info-row"><span class="info-label">Tanggal Selesai</span><span class="info-value">: ${new Date(tanggalSelesai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span></div>
     </div>
-    <p>Lembur Anda telah tercatat dalam sistem. Terima kasih atas dedikasi Anda!</p>
+    <p>Lembur Anda telah tercatat dalam sistem. ${pdfAttachment ? "Dokumen SPKL terlampir dalam email ini." : ""} Terima kasih atas dedikasi Anda!</p>
+    ${pdfAttachment ? `<p style="font-size:12px;color:#888;">📎 Dokumen SPKL: <strong>${pdfAttachment.filename}</strong></p>` : ""}
   `);
 
   await sendEmail({
     to,
     subject: `[ALUR] ✓ Lembur Anda Telah Disetujui`,
     html,
+    attachments: pdfAttachment
+      ? [{ filename: pdfAttachment.filename, content: pdfAttachment.buffer, contentType: "application/pdf" }]
+      : undefined,
   });
 }
 

@@ -7,6 +7,7 @@ import {
   Users, Search, Filter, Shield, Edit3, KeyRound,
   CheckCircle, X, RefreshCw, ChevronDown, Save,
   Mail, Phone, Building2, UserCog, AlertTriangle, UserPlus, Eye, EyeOff,
+  Moon, Sun, Info, AlertCircle,
 } from "lucide-react";
 
 interface UserRow {
@@ -95,6 +96,65 @@ const ROLE_COLORS: Record<string, string> = {
 const inputCls = "bg-surface-variant border-2 border-on-background rounded-xl px-3 py-2.5 text-sm font-body-md focus:outline-none focus:border-primary transition-colors w-full";
 const labelCls = "font-label-bold text-xs uppercase text-on-surface-variant mb-1 block";
 const sectionTitle = "font-label-bold text-xs uppercase text-primary mb-3 flex items-center gap-1.5";
+
+// ─── Shift/Non-Shift badge ───
+const SHIFT_SUB_BIDANG = ["OPERATOR_SHIFT"];
+
+function isShift(subBidang: string) {
+  return SHIFT_SUB_BIDANG.includes(subBidang);
+}
+
+function ShiftBadge({ subBidang }: { subBidang: string }) {
+  if (isShift(subBidang)) {
+    return (
+      <span className="inline-flex items-center gap-1 font-label-bold text-xs px-2.5 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-300">
+        <Moon size={11} /> SHIFT
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 font-label-bold text-xs px-2.5 py-1 rounded-full border bg-orange-50 text-orange-700 border-orange-300">
+      <Sun size={11} /> NON-SHIFT
+    </span>
+  );
+}
+
+// ─── Account completeness ───
+type CompletenessResult = {
+  score: number;       // 0–100
+  missing: string[];   // daftar field yang kosong
+};
+
+function checkCompleteness(u: UserRow): CompletenessResult {
+  const fields: { label: string; ok: boolean }[] = [
+    { label: "Email Personal", ok: !!u.emailPersonal },
+    { label: "No. HP",        ok: !!u.phone },
+    { label: "TL Group",      ok: isShift(u.subBidang) ? !!u.tlGroup : true },
+  ];
+  const missing = fields.filter(f => !f.ok).map(f => f.label);
+  const score   = Math.round(((fields.length - missing.length) / fields.length) * 100);
+  return { score, missing };
+}
+
+function CompletenessBadge({ user }: { user: UserRow }) {
+  const { score, missing } = checkCompleteness(user);
+  if (score === 100) {
+    return (
+      <span className="inline-flex items-center gap-1 font-label-bold text-xs px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-300">
+        <CheckCircle size={11} /> Lengkap
+      </span>
+    );
+  }
+  const label = missing.length === 1 ? `Kurang: ${missing[0]}` : `Kurang ${missing.length} data`;
+  return (
+    <span
+      title={`Belum diisi: ${missing.join(", ")}`}
+      className="inline-flex items-center gap-1 font-label-bold text-xs px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-300 cursor-help"
+    >
+      <AlertCircle size={11} /> {label}
+    </span>
+  );
+}
 
 function RoleBadge({ role }: { role: string }) {
   const c = ROLE_COLORS[role] ?? ROLE_COLORS.PEGAWAI;
@@ -505,6 +565,8 @@ export default function SuperAdminPage() {
   const [search, setSearch]           = useState("");
   const [bidang, setBidang]           = useState("");
   const [roleFilter, setRoleFilter]   = useState("");
+  const [shiftFilter, setShiftFilter] = useState<"" | "SHIFT" | "NON_SHIFT">("")
+  const [completenessFilter, setCompletenessFilter] = useState<"" | "LENGKAP" | "TIDAK_LENGKAP">("")
   const [editUser, setEditUser]       = useState<UserRow | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [resetTarget, setResetTarget] = useState<UserRow | null>(null);
@@ -552,6 +614,20 @@ export default function SuperAdminPage() {
     acc[r.value] = users.filter(u => u.role === r.value).length; return acc;
   }, {} as Record<string, number>);
 
+  // Apply client-side shift + completeness filters
+  const displayedUsers = users.filter(u => {
+    if (shiftFilter === "SHIFT"     && !isShift(u.subBidang)) return false;
+    if (shiftFilter === "NON_SHIFT" &&  isShift(u.subBidang)) return false;
+    const { score } = checkCompleteness(u);
+    if (completenessFilter === "LENGKAP"      && score !== 100)  return false;
+    if (completenessFilter === "TIDAK_LENGKAP" && score === 100) return false;
+    return true;
+  });
+
+  const totalShift    = users.filter(u =>  isShift(u.subBidang)).length;
+  const totalNonShift = users.filter(u => !isShift(u.subBidang)).length;
+  const totalLengkap  = users.filter(u => checkCompleteness(u).score === 100).length;
+
   if (sessionStatus === "loading" || !session) {
     return <main className="w-full flex items-center justify-center min-h-screen"><p className="font-label-bold uppercase animate-pulse">Memuat...</p></main>;
   }
@@ -586,11 +662,13 @@ export default function SuperAdminPage() {
       </div>
 
       {/* ── Stat Cards ── */}
-      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <StatCard label="Total User" value={users.length} color="bg-purple-100" icon={<Users size={20} className="text-purple-700" />} />
-        <StatCard label="Admin" value={(totalByRole.ADMIN ?? 0) + (totalByRole.SUPER_ADMIN ?? 0)} color="bg-primary-container" icon={<Shield size={20} className="text-on-primary" />} />
-        <StatCard label="Approver" value={(totalByRole.OFFICER ?? 0) + (totalByRole.TL ?? 0) + (totalByRole.ASMAN ?? 0) + (totalByRole.MANAGER ?? 0) + (totalByRole.BRANCH_MANAGER ?? 0)} color="bg-amber-100" icon={<CheckCircle size={20} className="text-amber-700" />} />
-        <StatCard label="Pegawai" value={totalByRole.PEGAWAI ?? 0} color="bg-surface-variant" icon={<Users size={20} className="text-on-surface-variant" />} />
+      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <StatCard label="Total User"  value={users.length}      color="bg-purple-100"          icon={<Users       size={20} className="text-purple-700"           />} />
+        <StatCard label="Admin"       value={(totalByRole.ADMIN ?? 0) + (totalByRole.SUPER_ADMIN ?? 0)} color="bg-primary-container" icon={<Shield size={20} className="text-on-primary" />} />
+        <StatCard label="Approver"    value={(totalByRole.OFFICER ?? 0) + (totalByRole.TL ?? 0) + (totalByRole.ASMAN ?? 0) + (totalByRole.MANAGER ?? 0) + (totalByRole.BRANCH_MANAGER ?? 0)} color="bg-amber-100" icon={<CheckCircle size={20} className="text-amber-700" />} />
+        <StatCard label="Pegawai"     value={totalByRole.PEGAWAI ?? 0} color="bg-surface-variant" icon={<Users size={20} className="text-on-surface-variant" />} />
+        <StatCard label="Shift"       value={totalShift}        color="bg-indigo-100"           icon={<Moon        size={20} className="text-indigo-700"           />} />
+        <StatCard label="Data Lengkap" value={totalLengkap}    color="bg-emerald-100"          icon={<CheckCircle size={20} className="text-emerald-700"          />} />
       </div>
 
       {/* ── Filter Bar ── */}
@@ -599,27 +677,74 @@ export default function SuperAdminPage() {
           <Filter size={15} className="text-primary" />
           <p className="font-label-bold text-xs uppercase text-on-surface">Filter & Pencarian</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {/* Search */}
+          <div className="relative sm:col-span-2 lg:col-span-1">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
             <input id="search-user" type="text" value={search} onChange={e => handleSearch(e.target.value)} placeholder="Cari nama atau NIP..." className={filterInputCls + " pl-9 w-full"} />
           </div>
+          {/* Bidang */}
           <div className="relative">
             <select id="filter-bidang" value={bidang} onChange={e => setBidang(e.target.value)} className={filterInputCls + " w-full appearance-none cursor-pointer pr-8"}>
               {BIDANG_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
           </div>
+          {/* Role */}
           <div className="relative">
             <select id="filter-role" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className={filterInputCls + " w-full appearance-none cursor-pointer pr-8"}>
               {ROLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
           </div>
+          {/* Shift filter */}
+          <div className="relative">
+            <select
+              id="filter-shift"
+              value={shiftFilter}
+              onChange={e => setShiftFilter(e.target.value as "" | "SHIFT" | "NON_SHIFT")}
+              className={filterInputCls + " w-full appearance-none cursor-pointer pr-8"}
+            >
+              <option value="">Semua Kategori</option>
+              <option value="SHIFT">Shift</option>
+              <option value="NON_SHIFT">Non-Shift</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
+          {/* Completeness filter */}
+          <div className="relative">
+            <select
+              id="filter-completeness"
+              value={completenessFilter}
+              onChange={e => setCompletenessFilter(e.target.value as "" | "LENGKAP" | "TIDAK_LENGKAP")}
+              className={filterInputCls + " w-full appearance-none cursor-pointer pr-8"}
+            >
+              <option value="">Semua Kelengkapan</option>
+              <option value="LENGKAP">Data Lengkap</option>
+              <option value="TIDAK_LENGKAP">Data Belum Lengkap</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+          </div>
         </div>
+        {/* Active filter summary */}
+        {(shiftFilter || completenessFilter) && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-on-background/10">
+            <Info size={12} className="text-primary" />
+            <p className="font-label-bold text-xs text-on-surface-variant">
+              Menampilkan {displayedUsers.length} dari {users.length} user
+            </p>
+            <button
+              onClick={() => { setShiftFilter(""); setCompletenessFilter(""); }}
+              className="ml-auto flex items-center gap-1 text-xs font-label-bold text-on-surface-variant border border-on-background/30 px-2.5 py-1 rounded-full hover:bg-surface-variant transition-colors"
+            >
+              <X size={11} /> Reset Filter
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── User Table ── */}
+      {/* Note: displayedUsers applies shift/completeness client filters */}
       {loading ? (
         <div className="w-full flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
@@ -635,6 +760,14 @@ export default function SuperAdminPage() {
             <UserPlus size={15} /> TAMBAH USER PERTAMA
           </button>
         </div>
+      ) : displayedUsers.length === 0 ? (
+        <div className="w-full flex flex-col items-center justify-center py-16 gap-4">
+          <Filter size={36} className="text-on-surface-variant/40" />
+          <p className="text-on-surface-variant text-sm">Tidak ada user sesuai filter yang dipilih.</p>
+          <button onClick={() => { setShiftFilter(""); setCompletenessFilter(""); }} className="font-label-bold text-xs border-2 border-on-background px-4 py-2 rounded-full hover:bg-surface-variant transition-colors">
+            Reset Filter
+          </button>
+        </div>
       ) : (
         <>
           {/* Desktop table */}
@@ -643,13 +776,13 @@ export default function SuperAdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-purple-700 text-white border-b-2 border-on-background">
-                    {["No", "Nama / NIP", "Jabatan", "Bidang / Sub Bidang", "Role", "Email Personal", "Lembur", "Aksi"].map(h => (
+                    {["No", "Nama / NIP", "Jabatan", "Bidang / Sub Bidang", "Kategori", "Role", "Kelengkapan", "Email Personal", "Lembur", "Aksi"].map(h => (
                       <th key={h} className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u, idx) => (
+                  {displayedUsers.map((u, idx) => (
                     <tr key={u.id} className={`border-b border-on-background/10 hover:bg-surface-container transition-colors ${idx % 2 === 1 ? "bg-surface-container-low/30" : ""}`}>
                       <td className="px-4 py-3 text-on-surface-variant text-xs">{idx + 1}</td>
                       <td className="px-4 py-3">
@@ -661,7 +794,18 @@ export default function SuperAdminPage() {
                         <p className="text-xs font-medium">{u.bidang.replace("_", " & ")}</p>
                         <p className="text-xs text-on-surface-variant">{u.subBidang.replace(/_/g, " ")}</p>
                       </td>
+                      {/* Shift/Non-Shift badge */}
+                      <td className="px-4 py-3">
+                        <ShiftBadge subBidang={u.subBidang} />
+                        {isShift(u.subBidang) && u.tlGroup && (
+                          <p className="text-xs text-on-surface-variant mt-1">Grup {u.tlGroup}</p>
+                        )}
+                      </td>
                       <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
+                      {/* Completeness */}
+                      <td className="px-4 py-3">
+                        <CompletenessBadge user={u} />
+                      </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">
                         {u.emailPersonal
                           ? <span className="flex items-center gap-1"><Mail size={11} className="text-primary" />{u.emailPersonal}</span>
@@ -687,7 +831,7 @@ export default function SuperAdminPage() {
 
           {/* Mobile cards */}
           <div className="lg:hidden flex flex-col gap-3 w-full">
-            {users.map(u => (
+            {displayedUsers.map(u => (
               <div key={u.id} className="bg-surface-container-lowest border-2 border-on-background rounded-2xl p-4 hard-shadow">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex-1 min-w-0">
@@ -697,6 +841,16 @@ export default function SuperAdminPage() {
                   <RoleBadge role={u.role} />
                 </div>
                 <p className="text-xs text-on-surface-variant mb-1">{u.bidang.replace("_", " & ")} — {u.subBidang.replace(/_/g, " ")}</p>
+                {/* Shift + Completeness badges */}
+                <div className="flex items-center gap-2 flex-wrap mt-2 mb-2">
+                  <ShiftBadge subBidang={u.subBidang} />
+                  <CompletenessBadge user={u} />
+                  {isShift(u.subBidang) && u.tlGroup && (
+                    <span className="font-label-bold text-xs text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full border border-on-background/20">
+                      Grup {u.tlGroup}
+                    </span>
+                  )}
+                </div>
                 {u.emailPersonal && <p className="text-xs text-primary flex items-center gap-1 mb-3"><Mail size={11} />{u.emailPersonal}</p>}
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => setEditUser(u)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full font-label-bold text-xs border-2 border-on-background bg-surface-variant hover:bg-primary hover:text-on-primary transition-all">
@@ -710,7 +864,9 @@ export default function SuperAdminPage() {
             ))}
           </div>
 
-          <p className="mt-4 font-label-bold text-xs uppercase text-on-surface-variant">Menampilkan {users.length} user</p>
+          <p className="mt-4 font-label-bold text-xs uppercase text-on-surface-variant">
+            Menampilkan {displayedUsers.length}{displayedUsers.length !== users.length ? ` dari ${users.length}` : ""} user
+          </p>
         </>
       )}
 

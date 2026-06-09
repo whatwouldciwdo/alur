@@ -39,10 +39,11 @@ export async function GET(req: NextRequest) {
           bidang: true,
           subBidang: true,
           emailPerusahaan: true,
+          tlGroup: true,
         },
       },
       approvals: {
-        include: { approver: { select: { nama: true, role: true } } },
+        include: { approver: { select: { nama: true, role: true, jenjangJabatan: true } } },
         orderBy: { step: "asc" },
       },
     },

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getNextStep } from "@/lib/workflow";
 import { sendApprovedEmail } from "@/lib/email";
+import { generateLemburPdfServer } from "@/lib/generateLemburPdfServer";
 import { SubBidang } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
@@ -27,7 +28,6 @@ export async function POST(req: NextRequest) {
   if (lembur.status !== "PENDING")
     return NextResponse.json({ error: "Lembur tidak dalam status PENDING" }, { status: 400 });
 
-  // Find the current approval step that is for Admin
   const currentApproval = lembur.approvals.find(
     (a) => a.step === lembur.currentStep && a.status === "PENDING"
   );
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   if (!currentApproval)
     return NextResponse.json({ error: "Tidak ada step pending untuk disetujui" }, { status: 400 });
 
-  // Update the current approval step to APPROVED
+  
   await prisma.approval.update({
     where: { id: currentApproval.id },
     data: {
@@ -47,8 +47,9 @@ export async function POST(req: NextRequest) {
   });
 
   // Check if there's a next step
+  // Admin (perekap) lembur hanya punya 1 step — tidak ada next step
   const subBidang = lembur.user.subBidang as SubBidang;
-  const nextStep = getNextStep(subBidang, lembur.currentStep);
+  const nextStep = lembur.user.role === "ADMIN" ? null : getNextStep(subBidang, lembur.currentStep);
 
   if (!nextStep) {
     // All steps done — mark lembur as APPROVED
@@ -56,11 +57,52 @@ export async function POST(req: NextRequest) {
       where: { id: lembur.id },
       data: { status: "APPROVED" },
     });
+
+    // Generate PDF attachment
+    let pdfAttachment: { buffer: Buffer; filename: string } | undefined;
+    try {
+      const fullLembur = await prisma.lembur.findUnique({
+        where: { id: lembur.id },
+        include: {
+          user: { select: { nama: true, nip: true, jenjangJabatan: true, bidang: true, subBidang: true, tlGroup: true } },
+          approvals: {
+            include: { approver: { select: { nama: true, role: true, jenjangJabatan: true } } },
+            orderBy: { step: "asc" },
+          },
+        },
+      });
+      if (fullLembur) {
+        pdfAttachment = await generateLemburPdfServer({
+          id:             fullLembur.id,
+          nomorSpkl:      fullLembur.nomorSpkl,
+          status:         fullLembur.status,
+          kategori:       fullLembur.kategori ?? "LEMBUR",
+          tanggalMulai:   fullLembur.tanggalMulai,
+          tanggalSelesai: fullLembur.tanggalSelesai,
+          deskripsi:      fullLembur.deskripsi,
+          penugas:        fullLembur.penugas,
+          evidentUrl:     fullLembur.evidentUrl,
+          submittedAt:    fullLembur.submittedAt ?? new Date(),
+          user:           fullLembur.user as any,
+          approvals:      fullLembur.approvals.map(a => ({
+            step:        a.step,
+            roleName:    a.roleName,
+            status:      a.status,
+            respondedAt: a.respondedAt as Date | string | null,
+            approver:    a.approver as any,
+          })),
+        });
+      }
+    } catch (pdfErr) {
+      console.error("[admin/approve] PDF generation failed:", pdfErr);
+    }
+
     await sendApprovedEmail({
-      to: lembur.user.emailPersonal || lembur.user.emailPerusahaan,
-      pegawaiName: lembur.user.nama,
-      tanggalMulai: lembur.tanggalMulai,
+      to:            lembur.user.emailPersonal || lembur.user.emailPerusahaan,
+      pegawaiName:   lembur.user.nama,
+      tanggalMulai:  lembur.tanggalMulai,
       tanggalSelesai: lembur.tanggalSelesai,
+      pdfAttachment,
     });
     return NextResponse.json({ success: true, status: "APPROVED" });
   }

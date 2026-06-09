@@ -20,7 +20,8 @@ export const WORKFLOW: WorkflowMap = {
   ],
   LINGKUNGAN: [
     { step: 1, roleName: "Officer Lingkungan", requiredRole: "OFFICER", subBidang: "LINGKUNGAN" },
-    { step: 2, roleName: "Asman K3L", requiredRole: "ASMAN", subBidang: "LINGKUNGAN" },
+    // Asman K3L melayani K3 & Lingkungan — user disimpan dengan subBidang K3
+    { step: 2, roleName: "Asman K3L", requiredRole: "ASMAN", subBidang: "K3" },
     { step: 3, roleName: "Manager Operasi", requiredRole: "MANAGER", bidang: "OPERASI" },
     { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
     { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
@@ -59,19 +60,19 @@ export const WORKFLOW: WorkflowMap = {
     { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
     { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
   ],
+  // Keuangan tidak punya step Officer — langsung mulai dari Asman
   KEUANGAN: [
-    { step: 1, roleName: "Officer Keuangan", requiredRole: "OFFICER", subBidang: "KEUANGAN" },
-    { step: 2, roleName: "Asman Keu & Akuntansi", requiredRole: "ASMAN", subBidang: "KEUANGAN" },
-    { step: 3, roleName: "Manager SDM & Keu", requiredRole: "MANAGER", bidang: "SDM_KEU" },
-    { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
-    { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
+    { step: 1, roleName: "Asman Keu & Akuntansi", requiredRole: "ASMAN", subBidang: "KEUANGAN" },
+    { step: 2, roleName: "Manager SDM & Keu", requiredRole: "MANAGER", bidang: "SDM_KEU" },
+    { step: 3, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
+    { step: 4, roleName: "Admin", requiredRole: "ADMIN" },
   ],
+  // PBJ tidak punya step Officer — langsung mulai dari Asman
   PBJ: [
-    { step: 1, roleName: "Officer PBJ", requiredRole: "OFFICER", subBidang: "PBJ" },
-    { step: 2, roleName: "Asman PBJ", requiredRole: "ASMAN", subBidang: "PBJ" },
-    { step: 3, roleName: "Manager SDM & Keu", requiredRole: "MANAGER", bidang: "SDM_KEU" },
-    { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
-    { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
+    { step: 1, roleName: "Asman PBJ", requiredRole: "ASMAN", subBidang: "PBJ" },
+    { step: 2, roleName: "Manager SDM & Keu", requiredRole: "MANAGER", bidang: "SDM_KEU" },
+    { step: 3, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
+    { step: 4, roleName: "Admin", requiredRole: "ADMIN" },
   ],
   LISTRIK: [
     { step: 1, roleName: "TL Listrik", requiredRole: "TL", subBidang: "LISTRIK" },
@@ -82,7 +83,8 @@ export const WORKFLOW: WorkflowMap = {
   ],
   IC: [
     { step: 1, roleName: "TL I&C", requiredRole: "TL", subBidang: "IC" },
-    { step: 2, roleName: "Asman I&C", requiredRole: "ASMAN", subBidang: "IC" },
+    // Asman I&C = Asman Listrik (Syahrial) — disimpan di subBidang LISTRIK
+    { step: 2, roleName: "Asman I&C", requiredRole: "ASMAN", subBidang: "LISTRIK" },
     { step: 3, roleName: "Manager Pemeliharaan", requiredRole: "MANAGER", bidang: "PEMELIHARAAN" },
     { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
     { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
@@ -96,7 +98,8 @@ export const WORKFLOW: WorkflowMap = {
   ],
   BOP: [
     { step: 1, roleName: "TL BOP", requiredRole: "TL", subBidang: "BOP" },
-    { step: 2, roleName: "Asman BOP", requiredRole: "ASMAN", subBidang: "BOP" },
+    // Asman BOP = Asman Mekanik (Yunarko) — disimpan di subBidang MEKANIK
+    { step: 2, roleName: "Asman BOP", requiredRole: "ASMAN", subBidang: "MEKANIK" },
     { step: 3, roleName: "Manager Pemeliharaan", requiredRole: "MANAGER", bidang: "PEMELIHARAAN" },
     { step: 4, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
     { step: 5, roleName: "Admin", requiredRole: "ADMIN" },
@@ -128,3 +131,11 @@ export function getNextStep(subBidang: SubBidang, currentStep: number): Workflow
 export function getTotalSteps(subBidang: SubBidang): number {
   return getWorkflowSteps(subBidang).length;
 }
+
+/**
+ * Alur khusus untuk ADMIN (perekap) yang mengajukan lembur.
+ * Tidak melalui rantai bidang — langsung ke Branch Manager.
+ */
+export const ADMIN_WORKFLOW: WorkflowStep[] = [
+  { step: 1, roleName: "Branch Manager IPS", requiredRole: "BRANCH_MANAGER" },
+];
