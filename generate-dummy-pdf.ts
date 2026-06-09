@@ -1,52 +1,9 @@
-/**
- * generateLemburPdf.ts
- * Client-side SPKL PDF generator using jsPDF + QRCode.
- * Call from a "use client" component only.
- */
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
+import fs from "fs";
+import path from "path";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface LemburPdfData {
-  id: string;
-  nomorSpkl: string | null;
-  status: string;
-  kategori: string;
-  tanggalMulai: string;
-  tanggalSelesai: string;
-  deskripsi: string;
-  penugas: string | null;
-  evidentUrl: string | null;
-  submittedAt: string;
-  user: {
-    nama: string;
-    nip: string;
-    jenjangJabatan: string;
-    bidang: string;
-    subBidang: string;
-    tlGroup: string | null;
-  };
-  approvals: {
-    step: number;
-    roleName: string;
-    status: string;
-    respondedAt: string | null;
-    approver: { nama: string; role: string; jenjangJabatan: string };
-  }[];
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
+// Helpers
 function fmtDate(iso: string): string {
   if (!iso) return "-";
   return new Date(iso).toLocaleDateString("id-ID", {
@@ -61,10 +18,6 @@ function fmtDateShort(iso: string): string {
     hour: "2-digit", minute: "2-digit",
   });
 }
-function fmtDateFile(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-}
 
 const BIDANG_LABEL: Record<string, string> = {
   OPERASI: "Operasi", PEMELIHARAAN: "Pemeliharaan",
@@ -78,12 +31,60 @@ const SUB_LABEL: Record<string, string> = {
   ADMIN_SEKRETARIS: "Admin/Sekretaris",
 };
 
-// ─── Main Generator ───────────────────────────────────────────────────────────
+async function run() {
+  const data = {
+    id: "dummy-lembur-123456",
+    nomorSpkl: "SPKL/OPR/2026/06/001",
+    status: "APPROVED",
+    kategori: "LEMBUR",
+    tanggalMulai: "2026-06-10T08:00:00Z",
+    tanggalSelesai: "2026-06-10T17:00:00Z",
+    deskripsi: "Penyelesaian laporan bulanan operasi dan rekapitulasi data energi.",
+    penugas: "Ade Majid",
+    evidentUrl: "dummy", // we will intercept this
+    submittedAt: "2026-06-09T08:00:00Z",
+    user: {
+      nama: "Ahmad Yani",
+      nip: "1778258308",
+      jenjangJabatan: "Pelaksana K3",
+      bidang: "OPERASI",
+      subBidang: "K3",
+      tlGroup: null,
+    },
+    approvals: [
+      {
+        step: 1,
+        roleName: "Officer K3 & Lingkungan",
+        status: "APPROVED",
+        respondedAt: "2026-06-09T09:00:00Z",
+        approver: { nama: "Supiin", role: "OFFICER", jenjangJabatan: "Officer K3 & Lingkungan" }
+      },
+      {
+        step: 2,
+        roleName: "Asman Operasi",
+        status: "APPROVED",
+        respondedAt: "2026-06-09T10:30:00Z",
+        approver: { nama: "Pambudi", role: "ASMAN", jenjangJabatan: "Asisten Manager Operasi" }
+      },
+      {
+        step: 3,
+        roleName: "Manager Operasi",
+        status: "APPROVED",
+        respondedAt: "2026-06-09T13:00:00Z",
+        approver: { nama: "Deni Junaidi", role: "MANAGER", jenjangJabatan: "Manager Operasi" }
+      },
+      {
+        step: 4,
+        roleName: "Branch Manager",
+        status: "APPROVED",
+        respondedAt: "2026-06-09T15:00:00Z",
+        approver: { nama: "Ade Majid", role: "BRANCH_MANAGER", jenjangJabatan: "Branch Manager" }
+      }
+    ]
+  };
 
-export async function generateLemburPdf(
-  data: LemburPdfData,
-  baseUrl: string
-): Promise<void> {
+  const baseUrl = "http://localhost:3000";
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const W = 210;
@@ -94,9 +95,9 @@ export async function generateLemburPdf(
 
   // ── KOP SURAT ─────────────────────────────────────────────────────────────
   try {
-    const logoRes = await fetch("/image/Logo-PLN-Indonesiapower-Services.png");
-    const logoBlob = await logoRes.blob();
-    const logoB64 = await blobToBase64(logoBlob);
+    const logoPath = path.join(process.cwd(), "public/image/Logo-PLN-Indonesiapower-Services.png");
+    const logoBuf = fs.readFileSync(logoPath);
+    const logoB64 = "data:image/png;base64," + logoBuf.toString("base64");
     doc.addImage(logoB64, "PNG", mL, y, 42, 14, undefined, "FAST");
   } catch (e) {
     console.error("Logo error", e);
@@ -128,30 +129,25 @@ export async function generateLemburPdf(
   y += 12;
 
   // ── JUDUL SURAT ───────────────────────────────────────────────────────────
-  const isLembur = data.kategori === "LEMBUR";
-  const titleTxt = isLembur ? "SURAT PERINTAH KERJA LEMBUR" : "SURAT PERINTAH PIKET";
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.text(titleTxt, W / 2, y, { align: "center" });
+  doc.text("SURAT PERINTAH KERJA LEMBUR", W / 2, y, { align: "center" });
   
   // Garis bawah untuk judul
-  const titleWidth = doc.getTextWidth(titleTxt);
+  const titleWidth = doc.getTextWidth("SURAT PERINTAH KERJA LEMBUR");
   doc.setLineWidth(0.3);
   doc.line((W - titleWidth) / 2, y + 1, (W + titleWidth) / 2, y + 1);
   y += 5;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  if (data.nomorSpkl) {
-    doc.text(`Nomor: ${data.nomorSpkl}`, W / 2, y, { align: "center" });
-  }
+  doc.text(`Nomor: ${data.nomorSpkl}`, W / 2, y, { align: "center" });
   y += 12;
 
   // ── ISI SURAT ─────────────────────────────────────────────────────────────
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Yang bertanda tangan di bawah ini, memberikan perintah ${isLembur ? "lembur" : "piket"} kepada:`, mL, y);
+  doc.text("Yang bertanda tangan di bawah ini, memberikan perintah lembur kepada:", mL, y);
   y += 8;
 
   // Fungsi pembantu untuk membuat baris dengan titik dua yang rapi
@@ -172,18 +168,13 @@ export async function generateLemburPdf(
   const bidangStr = `${BIDANG_LABEL[data.user.bidang] ?? data.user.bidang} / ${SUB_LABEL[data.user.subBidang] ?? data.user.subBidang}`;
   drawRow("Bidang / Bagian", bidangStr, y);
   y += 6;
-  
-  const isShift = data.user.subBidang === "OPERATOR_SHIFT";
-  const jenisKerja = isShift
-    ? `SHIFT${data.user.tlGroup ? ` — Grup ${data.user.tlGroup}` : ""}`
-    : "NON-SHIFT";
-  drawRow("Jenis Kerja", jenisKerja, y);
+  drawRow("Jenis Kerja", "SHIFT", y);
   y += 10;
 
-  doc.text(`Untuk melaksanakan pekerjaan di luar jam kerja normal (${isLembur ? "lembur" : "piket"}), dengan rincian sebagai berikut:`, mL, y);
+  doc.text("Untuk melaksanakan pekerjaan di luar jam kerja normal (lembur), dengan rincian sebagai berikut:", mL, y);
   y += 8;
 
-  drawRow("Kategori Pekerjaan", isLembur ? "KERJA LEMBUR" : "PIKET", y);
+  drawRow("Kategori Pekerjaan", "KERJA LEMBUR", y);
   y += 6;
   drawRow("Waktu Mulai", fmtDate(data.tanggalMulai), y);
   y += 6;
@@ -204,7 +195,7 @@ export async function generateLemburPdf(
     y += 4;
   }
 
-  doc.text(`Demikian surat perintah kerja ${isLembur ? "lembur" : "piket"} ini dibuat untuk dapat dilaksanakan dengan penuh tanggung jawab.`, mL, y, { maxWidth: cW, align: "justify" });
+  doc.text("Demikian surat perintah kerja lembur ini dibuat untuk dapat dilaksanakan dengan penuh tanggung jawab.", mL, y, { maxWidth: cW, align: "justify" });
   y += 20;
 
   // ── BAGIAN TANDA TANGAN ───────────────────────────────────────────────────
@@ -213,9 +204,9 @@ export async function generateLemburPdf(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text(dateStr, W - mR - 10, y, { align: "right" });
-  y += 12;
+  y += 12; // Jarak antara tanggal dan tabel tanda tangan
 
-  // QR Code global untuk dimasukkan ke setiap blok TTE (Tanda Tangan Elektronik)
+  // Generate QR Code untuk ditaruh di masing-masing TTE
   const validateUrl = `${baseUrl}/validate/${data.id}`;
   const qrDataUrl = await QRCode.toDataURL(validateUrl, {
     width: 60, margin: 0, errorCorrectionLevel: "M",
@@ -277,12 +268,6 @@ export async function generateLemburPdf(
     y += 40;
   }
 
-  // Jika halaman hampir habis sebelum QR, tambahkan halaman baru
-  if (y > 230) {
-    doc.addPage();
-    y = 20;
-  }
-
   // ── QR CODE & LOG LOGIC ───────────────────────────────────────────────────
   // Kita buat garis pemisah tipis
   doc.setDrawColor(200, 200, 200);
@@ -300,16 +285,12 @@ export async function generateLemburPdf(
   
   // Log all approvals
   data.approvals.forEach((app, idx) => {
-    let statTxt = "Menunggu";
-    if (app.status === "APPROVED") statTxt = `Disetujui pada ${fmtDateShort(app.respondedAt || "")}`;
-    else if (app.status === "REJECTED") statTxt = `Ditolak pada ${fmtDateShort(app.respondedAt || "")}`;
-
-    const logText = `${idx + 1}. [${statTxt}] oleh: ${app.approver?.nama || "-"} (${app.roleName})`;
+    const logText = `${idx + 1}. Disetujui oleh: ${app.approver.nama} (${app.roleName}) pada ${fmtDateShort(app.respondedAt || "")}`;
     doc.text(logText, mL, y);
     y += 5;
   });
 
-  // QR Code global untuk log
+  // QR Code
   const qrSize = 25;
   const qrY = y - (data.approvals.length * 5) - 5; // Align with log title
   const qrX = W - mR - qrSize;
@@ -348,46 +329,24 @@ export async function generateLemburPdf(
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    if (data.nomorSpkl) {
-      doc.text(`Lampiran untuk SPKL Nomor: ${data.nomorSpkl}`, W / 2, y, { align: "center" });
-      y += 10;
-    }
+    doc.text(`Lampiran untuk SPKL Nomor: ${data.nomorSpkl}`, W / 2, y, { align: "center" });
+    y += 10;
 
-    // Load evident image
+    // Load evident image (dummy uses logo)
     try {
-      const imgRes = await fetch(data.evidentUrl);
-      const imgBlob = await imgRes.blob();
-      const imgB64 = await blobToBase64(imgBlob);
-      const imgType = imgBlob.type.includes("png") ? "PNG" : "JPEG";
-      
-      // Karena kita mendownload dari cloud (Supabase), 
-      // ukuran aslinya tidak diketahui langsung dari base64 secara sinkron di jsPDF tanpa memuat Image object,
-      // kita set ke lebar maksimal, lalu jsPDF akan menyesuaikan proporsi (atau kita bisa ambil info image, tapi untuk simplify kita pakai fixed max width dan set alias supaya proporsional).
-      // Untuk amannya, kita beri space besar di bawah.
+      const evidentPath = path.join(process.cwd(), "public/image/Logo-PLN-Indonesiapower-Services.png");
+      const evidentBuf = fs.readFileSync(evidentPath);
+      const evidentB64 = "data:image/png;base64," + evidentBuf.toString("base64");
       
       // Calculate max width/height to fit page
       const maxImgW = W - (mL * 2);
       const maxImgH = pageH - y - 30; // Leave space for footer
       
-      // doc.addImage takes (base64, format, x, y, width, height)
-      // If we only provide width and height as undefined or skip them, it prints native resolution,
-      // which might be huge. We can use a trick: create an Image element to get dimensions if in browser.
-      
-      const imgProps = doc.getImageProperties(imgB64);
-      const imgRatio = imgProps.height / imgProps.width;
-      
-      let finalW = maxImgW;
-      let finalH = finalW * imgRatio;
-      
-      if (finalH > maxImgH) {
-        finalH = maxImgH;
-        finalW = finalH / imgRatio;
-      }
-      
-      // Center the image horizontally
-      const imgX = (W - finalW) / 2;
+      // Assuming logo ratio 3:1 for dummy, adjust in real app based on actual ratio
+      const imgW = maxImgW;
+      const imgH = maxImgW / 3; 
 
-      doc.addImage(imgB64, imgType, imgX, y, finalW, finalH, undefined, "FAST");
+      doc.addImage(evidentB64, "PNG", mL, y, imgW, imgH, undefined, "FAST");
     } catch (e) {
       console.error("Evident image error", e);
       doc.setFont("helvetica", "italic");
@@ -397,10 +356,9 @@ export async function generateLemburPdf(
     printFooter();
   }
 
-  // ── SAVE ──────────────────────────────────────────────────────────────────────
-  const safeName = data.user.nama.replace(/[^a-zA-Z0-9]/g, "_");
-  const dateStr  = fmtDateFile(data.tanggalMulai);
-  const isLemburName = isLembur ? "SPKL" : "SPP";
-  const filename = `${isLemburName}_${safeName}_${dateStr}.pdf`;
-  doc.save(filename);
+  const outPath = path.join(process.cwd(), "dummy_spkl_v5.pdf");
+  fs.writeFileSync(outPath, Buffer.from(doc.output("arraybuffer")));
+  console.log("PDF saved to", outPath);
 }
+
+run().catch(console.error);

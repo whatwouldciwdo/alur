@@ -13,6 +13,7 @@ export default function Navbar() {
   const isLoggedIn = !!session;
 
   return (
+    pathname.startsWith("/validate") ? null :
     <nav className="bg-surface-container-lowest fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-max md:max-w-max rounded-[2rem] border-2 border-on-background px-4 md:px-6 py-2 shadow-[4px_4px_0px_0px_rgba(27,28,28,1)] flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8 z-50 transition-all">
       <div className="flex items-center justify-between w-full md:w-auto">
         <Link 

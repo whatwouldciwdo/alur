@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Mengizinkan akses HMR dari IP lokal untuk scan QR via HP
+  allowedDevOrigins: ["192.168.1.5"],
 };
 
 export default nextConfig;

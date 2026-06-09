@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import {
-  CheckCircle, XCircle, Clock, Shield, QrCode,
-  User, Calendar, FileText, Building2, AlertCircle
-} from "lucide-react";
+import { CheckCircle, XCircle, Clock, Shield, ShieldCheck, FileText, Stamp } from "lucide-react";
 
 interface ApprovalStep {
   step: number;
@@ -52,13 +49,6 @@ function fmtDate(iso: string) {
   });
 }
 
-const STATUS_CONFIG = {
-  APPROVED: { color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", icon: CheckCircle, label: "DISETUJUI" },
-  REJECTED: { color: "text-red-600", bg: "bg-red-50 border-red-200", icon: XCircle, label: "DITOLAK" },
-  PENDING:  { color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: Clock, label: "MENUNGGU" },
-  REVISED:  { color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: AlertCircle, label: "REVISI" },
-} as const;
-
 export default function ValidatePage() {
   const { lemburId } = useParams<{ lemburId: string }>();
   const [data, setData] = useState<LemburData | null>(null);
@@ -74,189 +64,159 @@ export default function ValidatePage() {
   }, [lemburId]);
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-slate-500">
-        <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium">Memverifikasi dokumen...</p>
+    <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center p-4">
+      <div className="flex flex-col items-center gap-4 text-gray-500">
+        <div className="w-8 h-8 border-2 border-blue-800 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm uppercase tracking-widest font-semibold">Memverifikasi Dokumen...</p>
       </div>
     </div>
   );
 
   if (error || !data) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center border border-red-100">
-        <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-slate-800 mb-2">Dokumen Tidak Valid</h1>
-        <p className="text-slate-500 text-sm">{error || "Dokumen tidak ditemukan atau link tidak valid."}</p>
+    <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center p-4">
+      <div className="bg-white max-w-lg w-full border-t-4 border-red-600 shadow-xl p-8 text-center">
+        <XCircle className="w-16 h-16 text-red-600 mx-auto mb-6" />
+        <h1 className="text-2xl font-serif font-bold text-gray-900 mb-2 uppercase tracking-wide">Dokumen Tidak Valid</h1>
+        <p className="text-gray-600 mb-6">{error || "Dokumen tidak ditemukan di dalam sistem ALUR PLN IP Services."}</p>
+        <p className="text-xs text-gray-400">Harap pastikan kode QR yang Anda pindai berasal dari dokumen resmi.</p>
       </div>
     </div>
   );
 
-  const statusCfg = STATUS_CONFIG[data.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING;
-  const StatusIcon = statusCfg.icon;
+  const isApproved = data.status === "APPROVED";
+  const isRejected = data.status === "REJECTED";
+  const isPending = data.status === "PENDING" || data.status === "REVISED";
   const isShift = data.user.subBidang === "OPERATOR_SHIFT";
-  const approvedApprovals = data.approvals.filter(a => a.status === "APPROVED");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50">
-      {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Image src="/image/Logo-PLN-Indonesiapower-Services.png" alt="PLN IP" width={120} height={32} className="object-contain h-8 w-auto" />
-          <div className="h-6 w-px bg-slate-200" />
-          <div>
-            <p className="text-xs text-slate-500 leading-none">Sistem ALUR</p>
-            <p className="text-sm font-semibold text-slate-800 leading-tight">Verifikasi Dokumen</p>
-          </div>
-          <div className="ml-auto flex items-center gap-1.5 text-xs text-slate-400">
-            <QrCode className="w-4 h-4" />
-            <span>Hasil Scan QR</span>
+    <div className="min-h-screen bg-[#f3f4f6] py-8 px-4 flex justify-center font-sans">
+      <div className="bg-white max-w-2xl w-full shadow-2xl relative overflow-hidden">
+        {/* Top Header / Kop Resmi */}
+        <div className="border-b-4 border-double border-gray-800 p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-white">
+          <Image src="/image/Logo-PLN-Indonesiapower-Services.png" alt="PLN IP" width={160} height={45} className="object-contain w-auto h-auto" />
+          <div className="text-center md:text-right">
+            <h1 className="text-lg font-bold text-gray-900 uppercase tracking-widest">Sistem ALUR</h1>
+            <p className="text-xs text-gray-600 uppercase tracking-wider mt-1">PT PLN Indonesia Power Services</p>
+            <p className="text-xs text-gray-500 mt-0.5">Unit Bisnis Pembangkitan Cilegon</p>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+        {/* Status Section */}
+        <div className="px-6 py-8 flex flex-col items-center text-center border-b border-gray-200 bg-gray-50/50">
+          {isApproved && <ShieldCheck className="w-16 h-16 text-emerald-600 mb-3" />}
+          {isRejected && <XCircle className="w-16 h-16 text-red-600 mb-3" />}
+          {isPending && <Clock className="w-16 h-16 text-amber-600 mb-3" />}
 
-        {/* Status Banner */}
-        <div className={`rounded-2xl border-2 p-5 flex items-center gap-4 ${statusCfg.bg}`}>
-          <div className={`p-3 rounded-full bg-white shadow-sm ${statusCfg.color}`}>
-            <StatusIcon className="w-8 h-8" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Status Dokumen</p>
-            <p className={`text-2xl font-black ${statusCfg.color}`}>{statusCfg.label}</p>
-            {data.status === "APPROVED" && (
-              <p className="text-xs text-emerald-600 mt-0.5 flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                Dokumen ini telah diverifikasi dan disetujui secara digital
-              </p>
-            )}
-          </div>
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Status Validasi Dokumen</h2>
+          <h3 className={`text-2xl sm:text-3xl font-serif font-bold uppercase tracking-wide ${isApproved ? 'text-emerald-700' : isRejected ? 'text-red-700' : 'text-amber-700'}`}>
+            {isApproved ? "TERVALIDASI & SAH" : isRejected ? "DITOLAK" : "DALAM PROSES"}
+          </h3>
+          
           {data.nomorSpkl && (
-            <div className="text-right hidden sm:block">
-              <p className="text-xs text-slate-400 uppercase tracking-wide">Nomor SPKL</p>
-              <p className="text-xs font-mono font-semibold text-slate-700 mt-0.5 max-w-40 text-right">{data.nomorSpkl}</p>
+            <div className="mt-5 bg-white px-5 py-2 border border-gray-300 shadow-sm">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Nomor Referensi</p>
+              <p className="text-sm font-mono font-bold text-gray-900">{data.nomorSpkl}</p>
             </div>
           )}
         </div>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          {/* Data Pegawai */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 bg-blue-50 rounded-lg"><User className="w-4 h-4 text-blue-600" /></div>
-              <h2 className="text-sm font-bold text-slate-800">Data Pegawai</h2>
+        <div className="p-6 sm:p-8 space-y-8 bg-white">
+          {/* Data Pegawai & Pekerjaan */}
+          <div>
+            <div className="flex items-center gap-2 border-b-2 border-gray-800 pb-2 mb-4">
+              <FileText className="w-4 h-4 text-gray-800" />
+              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Informasi Dokumen</h4>
             </div>
-            <div className="space-y-2.5 text-sm">
-              <InfoRow label="Nama" value={data.user.nama} />
-              <InfoRow label="NIP" value={data.user.nip} mono />
-              <InfoRow label="Jabatan" value={data.user.jenjangJabatan} />
-              <InfoRow label="Bidang" value={BIDANG_LABEL[data.user.bidang] ?? data.user.bidang} />
-              <InfoRow label="Sub-Bidang" value={SUB_LABEL[data.user.subBidang] ?? data.user.subBidang} />
-              <InfoRow label="Jenis Kerja"
-                value={isShift ? `SHIFT${data.user.tlGroup ? ` — Grup ${data.user.tlGroup}` : ""}` : "NON-SHIFT"} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+              <div className="space-y-2">
+                <DataRow label="Nama" value={data.user.nama} />
+                <DataRow label="NIP" value={data.user.nip} font="font-mono" />
+                <DataRow label="Jabatan" value={data.user.jenjangJabatan} />
+                <DataRow label="Bidang" value={`${BIDANG_LABEL[data.user.bidang] ?? data.user.bidang} / ${SUB_LABEL[data.user.subBidang] ?? data.user.subBidang}`} />
+              </div>
+              <div className="space-y-2">
+                <DataRow label="Kategori" value={data.kategori === "LEMBUR" ? "Kerja Lembur" : "Piket"} />
+                <DataRow label="Jenis Kerja" value={isShift ? `SHIFT${data.user.tlGroup ? ` — Grup ${data.user.tlGroup}` : ""}` : "NON-SHIFT"} />
+                <DataRow label="Waktu Mulai" value={fmtDate(data.tanggalMulai)} />
+                <DataRow label="Waktu Selesai" value={fmtDate(data.tanggalSelesai)} />
+              </div>
+            </div>
+            
+            <div className="mt-5 pt-4 border-t border-gray-100">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Deskripsi Pekerjaan:</p>
+              <p className="text-sm text-gray-800 leading-relaxed text-justify">{data.deskripsi}</p>
+            </div>
+          </div>
+
+          {/* Rantai Persetujuan */}
+          <div>
+            <div className="flex items-center gap-2 border-b-2 border-gray-800 pb-2 mb-4">
+              <Stamp className="w-4 h-4 text-gray-800" />
+              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Log Persetujuan Digital</h4>
+            </div>
+            
+            <div className="overflow-x-auto w-full border border-gray-300">
+              <table className="w-full text-left text-sm min-w-[500px]">
+                <thead className="bg-gray-100 border-b border-gray-300">
+                  <tr>
+                    <th className="px-4 py-2 font-bold text-gray-700 text-xs uppercase tracking-wider w-1/3">Pejabat Pengesah</th>
+                    <th className="px-4 py-2 font-bold text-gray-700 text-xs uppercase tracking-wider">Status Validasi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {data.approvals.map((a, i) => {
+                    const isAppr = a.status === "APPROVED";
+                    const isRej = a.status === "REJECTED";
+                    return (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 align-top">
+                          <div className="font-semibold text-gray-900">{a.approver?.nama ?? "—"}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{a.roleName}</div>
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 border ${
+                              isAppr ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                              isRej ? 'bg-red-50 text-red-700 border-red-200' :
+                              'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                              {isAppr ? 'Disetujui' : isRej ? 'Ditolak' : 'Menunggu'}
+                            </span>
+                          </div>
+                          {a.respondedAt && (
+                            <div className="text-xs text-gray-500 mt-1">Pada: {fmtDate(a.respondedAt)}</div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Detail Lembur */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 bg-amber-50 rounded-lg"><Calendar className="w-4 h-4 text-amber-600" /></div>
-              <h2 className="text-sm font-bold text-slate-800">Detail Pekerjaan</h2>
-            </div>
-            <div className="space-y-2.5 text-sm">
-              <InfoRow label="Jenis"
-                value={data.kategori === "LEMBUR" ? "Kerja Lembur" : "Piket"}
-                badge={data.kategori === "LEMBUR" ? "amber" : "blue"} />
-              <InfoRow label="Mulai" value={fmtDate(data.tanggalMulai)} />
-              <InfoRow label="Selesai" value={fmtDate(data.tanggalSelesai)} />
-              {data.penugas && <InfoRow label="Penugas" value={data.penugas} />}
-              <InfoRow label="Diajukan" value={fmtDate(data.submittedAt)} />
-            </div>
-          </div>
         </div>
 
-        {/* Deskripsi */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-slate-50 rounded-lg"><FileText className="w-4 h-4 text-slate-600" /></div>
-            <h2 className="text-sm font-bold text-slate-800">Deskripsi Pekerjaan</h2>
-          </div>
-          <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{data.deskripsi}</p>
-        </div>
-
-        {/* Approval Chain */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5 bg-emerald-50 rounded-lg"><Building2 className="w-4 h-4 text-emerald-600" /></div>
-            <h2 className="text-sm font-bold text-slate-800">Rantai Persetujuan</h2>
-            <span className="ml-auto text-xs text-slate-400">
-              {approvedApprovals.length}/{data.approvals.length} disetujui
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            {data.approvals.map((a, idx) => {
-              const cfg = STATUS_CONFIG[a.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING;
-              const Icon = cfg.icon;
-              return (
-                <div key={idx} className={`flex items-start gap-3 rounded-xl p-3.5 border ${cfg.bg}`}>
-                  <div className={`mt-0.5 shrink-0 ${cfg.color}`}><Icon className="w-5 h-5" /></div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Step {a.step}</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        a.status === "APPROVED" ? "bg-emerald-100 text-emerald-700"
-                        : a.status === "REJECTED" ? "bg-red-100 text-red-700"
-                        : "bg-amber-100 text-amber-700"}`}>
-                        {cfg.label}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-slate-800 mt-0.5">{a.roleName}</p>
-                    <p className="text-xs text-slate-500">{a.approver?.nama ?? "—"}</p>
-                    {a.respondedAt && (
-                      <p className="text-xs text-slate-400 mt-1">
-                        {a.status === "APPROVED" ? "✓ Disetujui" : "✗ Diproses"} pada {fmtDate(a.respondedAt)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center text-xs text-slate-400 pb-6 space-y-1">
-          <p className="flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" />
-            Dokumen ini diverifikasi melalui Sistem ALUR — PT PLN Indonesia Power Services UBP Cilegon
+        {/* Footer info */}
+        <div className="bg-gray-900 text-gray-400 p-6 sm:p-8 text-center text-xs leading-relaxed">
+          <p className="mb-2 uppercase tracking-widest text-gray-300 font-bold">Dokumen Elektronik Sah</p>
+          <p className="max-w-md mx-auto">
+            Halaman ini adalah bukti validasi resmi dari Sistem ALUR PT PLN Indonesia Power Services. Pemalsuan dokumen elektronik dapat dikenakan sanksi sesuai dengan peraturan yang berlaku.
           </p>
-          <p>ID Dokumen: <span className="font-mono">{data.id}</span></p>
+          <p className="mt-4 font-mono text-[10px] text-gray-500">ID: {data.id}</p>
         </div>
       </div>
     </div>
   );
 }
 
-function InfoRow({ label, value, mono, badge }: {
-  label: string; value: string; mono?: boolean; badge?: "amber" | "blue";
-}) {
+function DataRow({ label, value, font = "font-sans" }: { label: string; value: string; font?: string }) {
   return (
-    <div className="flex items-start gap-2">
-      <span className="text-slate-400 text-xs w-20 shrink-0 pt-0.5">{label}</span>
-      {badge ? (
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-          badge === "amber" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>
-          {value}
-        </span>
-      ) : (
-        <span className={`text-slate-800 font-medium break-words ${mono ? "font-mono text-xs" : "text-sm"}`}>
-          {value}
-        </span>
-      )}
+    <div className="flex items-start">
+      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider w-28 shrink-0 mt-0.5">{label}</span>
+      <span className="text-xs font-bold text-gray-500 w-4 shrink-0 mt-0.5">:</span>
+      <span className={`text-sm text-gray-900 font-medium ${font} flex-1`}>{value}</span>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function FooterBanner() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -16,8 +18,7 @@ export default function FooterBanner() {
     document.cookie = "alur_cookie_accepted=true; max-age=31536000; path=/";
     setIsVisible(false);
   };
-
-  if (!isVisible) return null;
+  if (!isVisible || pathname.startsWith("/validate")) return null;
 
   return (
     <div className="bg-surface fixed bottom-4 right-4 left-4 md:left-auto md:bottom-6 md:right-6 md:w-80 rounded-[1.5rem] border-2 border-on-background p-4 md:p-6 shadow-[6px_6px_0px_0px_rgba(27,28,28,1)] flex flex-col gap-4 z-50">
