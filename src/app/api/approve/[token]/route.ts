@@ -224,7 +224,7 @@ export async function POST(
 
     if (nextApproval?.token) {
       await sendApprovalRequestEmail({
-        to:            nextApprover.emailPersonal || nextApprover.emailPerusahaan,
+        to:            nextApprover.emailPerusahaan || nextApprover.emailPersonal,
         approverName:  nextApprover.nama,
         pegawaiName:   lembur.user.nama,
         subBidang:     lembur.user.subBidang,
