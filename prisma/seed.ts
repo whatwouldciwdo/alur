@@ -411,6 +411,7 @@ async function main() {
     nip: string; nama: string; jenjangJabatan: string;
     bidang: string; subBidang: string; tlGroup?: string;
     tipeKerja: string;
+    role?: string; // opsional — default PEGAWAI, kecuali ADMIN perekap
     emailPerusahaan: string; emailPersonal?: string; phone?: string;
   };
 
@@ -492,8 +493,9 @@ async function main() {
     { nip: "1996365628", nama: "M. Rivanur Todo Faruq", jenjangJabatan: "Pelaksana Senior Akutansi", bidang: "SDM_KEU", subBidang: "KEUANGAN", tipeKerja: "NON_SHIFT", emailPerusahaan: "rivanur.faruq@plnipservices.co.id", emailPersonal: "Rivanur.t.f@gmail.com", phone: "085774412492" },
 
     // ── SDM & KEU: SDM — NON SHIFT ────────────────────────────────
-    { nip: "1494179518", nama: "R.A Suci Arbianty", jenjangJabatan: "Pelaksana Senior Adminitrasi (Non Formasi)", bidang: "SDM_KEU", subBidang: "SDM", tipeKerja: "NON_SHIFT", emailPerusahaan: "suciarbianty@plnipservices.co.id", emailPersonal: "suciarbianty@ymail.com", phone: "08557628632" },
-    { nip: "1593218108", nama: "Annisa Frezty", jenjangJabatan: "Pelaksana Administrasi (Non Formasi)", bidang: "SDM_KEU", subBidang: "SDM", tipeKerja: "NON_SHIFT", emailPerusahaan: "annisa.fadilla@plnipservices.co.id", emailPersonal: "frezyannisa@gmail.com", phone: "081808340629" },
+    // Role ADMIN agar saat mengajukan lembur alur langsung ke Branch Manager (ADMIN_WORKFLOW)
+    { nip: "1494179518", nama: "R.A Suci Arbianty", role: "ADMIN", jenjangJabatan: "Pelaksana Senior Adminitrasi (Non Formasi)", bidang: "SDM_KEU", subBidang: "SDM", tipeKerja: "NON_SHIFT", emailPerusahaan: "suciarbianty@plnipservices.co.id", emailPersonal: "suciarbianty@ymail.com", phone: "08557628632" },
+    { nip: "1593218108", nama: "Annisa Frezty", role: "ADMIN", jenjangJabatan: "Pelaksana Administrasi (Non Formasi)", bidang: "SDM_KEU", subBidang: "SDM", tipeKerja: "NON_SHIFT", emailPerusahaan: "annisa.fadilla@plnipservices.co.id", emailPersonal: "frezyannisa@gmail.com", phone: "081808340629" },
   ];
 
   for (const p of pegawaiList) {
@@ -505,6 +507,7 @@ async function main() {
         jenjangJabatan: p.jenjangJabatan,
         bidang: p.bidang as any,
         subBidang: p.subBidang as any,
+        role: (p.role ?? "PEGAWAI") as any,
         tlGroup: p.tlGroup ?? null,
         tipeKerja: p.tipeKerja as any,
         phone: p.phone,
@@ -516,7 +519,7 @@ async function main() {
         jenjangJabatan: p.jenjangJabatan,
         bidang: p.bidang as any,
         subBidang: p.subBidang as any,
-        role: "PEGAWAI",
+        role: (p.role ?? "PEGAWAI") as any,
         tlGroup: p.tlGroup,
         tipeKerja: p.tipeKerja as any,
         emailPerusahaan: p.emailPerusahaan,
@@ -525,7 +528,7 @@ async function main() {
         password: await hash("password123"),
       },
     });
-    console.log(`  ✓ ${p.nama} [${p.tipeKerja}]`);
+    console.log(`  ✓ ${p.nama} [${p.tipeKerja}] [${p.role ?? "PEGAWAI"}]`);
   }
 
   console.log("✅ Seeding selesai!");

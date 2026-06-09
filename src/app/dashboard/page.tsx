@@ -249,7 +249,7 @@ export default function Dashboard() {
       </div>
 
       {/* Active Clock-In Banner */}
-      {user.role === "PEGAWAI" && activeClock && (
+      {(user.role === "PEGAWAI" || user.role === "ADMIN") && activeClock && (
         <Link href="/lembur/ajukan" className="block w-full mb-4">
           <div className="w-full bg-amber-400 border-2 border-on-background rounded-2xl px-5 py-4 hard-shadow flex items-center gap-3 hover:translate-y-[-2px] transition-transform">
             <div className="w-10 h-10 rounded-full bg-white border-2 border-on-background flex items-center justify-center shrink-0">
@@ -290,8 +290,8 @@ export default function Dashboard() {
       {/* ── Action Cards Grid ── */}
       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
 
-        {/* Ajukan Lembur (PEGAWAI) */}
-        {user.role === "PEGAWAI" && (
+        {/* Ajukan Lembur (PEGAWAI & ADMIN yang mengajukan) */}
+        {(user.role === "PEGAWAI" || user.role === "ADMIN") && (
           <div className="bg-primary-container border-2 border-on-background rounded-[1.5rem] p-6 hard-shadow flex flex-col gap-4">
             <h2 className="font-headline-md text-xl sm:text-headline-md text-on-background uppercase">Absensi Lembur</h2>
             <p className="font-body-md text-on-surface-variant text-sm">Mulai pengajuan lembur baru untuk disetujui oleh atasan Anda.</p>
@@ -345,8 +345,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* ── Approval Progress Section (PEGAWAI only) ── */}
-      {user.role === "PEGAWAI" && (
+      {/* ── Approval Progress Section (PEGAWAI & ADMIN pengaju) ── */}
+      {(user.role === "PEGAWAI" || user.role === "ADMIN") && (
         <div className="w-full mt-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-label-bold text-xs uppercase text-on-surface-variant">
