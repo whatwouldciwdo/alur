@@ -667,7 +667,7 @@ export default function AdminPage() {
           {/* Desktop: Table */}
           <div className="hidden lg:block w-full border-2 border-on-background rounded-2xl hard-shadow overflow-hidden bg-surface-container-lowest">
             <div className="w-full overflow-x-auto">
-              <table className="w-full text-sm min-w-[1200px]">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-primary text-on-primary border-b-2 border-on-background">
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">No</th>
@@ -677,7 +677,7 @@ export default function AdminPage() {
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Sub Bidang</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Periode</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Durasi</th>
-                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Nomor SPKL</th>
+                    <th className="text-left px-4 py-3 font-label-bold text-xs uppercase">Nomor SPKL</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Deskripsi</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">Status</th>
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap"></th>
@@ -725,7 +725,7 @@ export default function AdminPage() {
                           {formatDurasi(l.tanggalMulai, l.tanggalSelesai)}
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-xs font-mono text-on-surface-variant whitespace-nowrap">
+                          <p className="text-xs font-mono text-on-surface-variant break-words min-w-[100px]">
                             {l.nomorSpkl ?? <span className="italic text-on-surface-variant/50">—</span>}
                           </p>
                         </td>
