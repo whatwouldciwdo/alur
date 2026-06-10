@@ -399,8 +399,8 @@ export async function generateLemburPdf(
 
   // ── SAVE ──────────────────────────────────────────────────────────────────────
   const safeName = data.user.nama.replace(/[^a-zA-Z0-9]/g, "_");
-  const dateStr  = fmtDateFile(data.tanggalMulai);
+  const fileDateStr  = fmtDateFile(data.tanggalMulai);
   const isLemburName = isLembur ? "SPKL" : "SPP";
-  const filename = `${isLemburName}_${safeName}_${dateStr}.pdf`;
+  const filename = `${isLemburName}_${safeName}_${fileDateStr}.pdf`;
   doc.save(filename);
 }
