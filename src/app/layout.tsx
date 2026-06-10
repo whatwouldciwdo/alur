@@ -10,6 +10,16 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ALUR — Absen Lembur Ranger",
   description: "Sistem informasi absensi lembur Ranger PLN Indonesia Power Services UBP Cilegon",
+  icons: {
+    icon: [
+      { url: '/image/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/image/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/image/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/image/favicon/site.webmanifest',
 };
 
 export default async function RootLayout({

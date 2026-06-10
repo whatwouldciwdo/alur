@@ -665,9 +665,9 @@ export default function AdminPage() {
       ) : (
         <div className="w-full">
           {/* Desktop: Table */}
-          <div className="hidden lg:block w-full overflow-x-auto">
-            <div className="min-w-full bg-surface-container-lowest border-2 border-on-background rounded-2xl hard-shadow overflow-hidden">
-              <table className="w-full text-sm">
+          <div className="hidden lg:block w-full border-2 border-on-background rounded-2xl hard-shadow overflow-hidden bg-surface-container-lowest">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm min-w-[1200px]">
                 <thead>
                   <tr className="bg-primary text-on-primary border-b-2 border-on-background">
                     <th className="text-left px-4 py-3 font-label-bold text-xs uppercase whitespace-nowrap">No</th>
@@ -801,7 +801,6 @@ export default function AdminPage() {
               </table>
             </div>
           </div>
-
           {/* Mobile: Cards */}
           <div className="lg:hidden flex flex-col gap-3">
             {lemburs.map((l, idx) => {
