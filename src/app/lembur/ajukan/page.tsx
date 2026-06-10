@@ -216,7 +216,7 @@ export default function AjukanLembur() {
         </Link>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <h1 className="font-headline-lg text-2xl sm:text-headline-lg text-on-background tracking-tight">
-            FORM PENGAJUAN
+            FORM LEMBUR BARU
           </h1>
           {/* Toggle Kategori */}
           <div className="flex items-center border-2 border-on-background rounded-full overflow-hidden hard-shadow">
