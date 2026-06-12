@@ -95,9 +95,9 @@ export default function ValidatePage() {
         <div className="border-b-4 border-double border-gray-800 p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-white">
           <Image src="/image/Logo-PLN-Indonesiapower-Services.png" alt="PLN IP" width={160} height={45} className="object-contain w-auto h-auto" />
           <div className="text-center md:text-right">
-            <h1 className="text-lg font-bold text-gray-900 uppercase tracking-widest">Sistem ALUR</h1>
-            <p className="text-xs text-gray-600 uppercase tracking-wider mt-1">PT PLN Indonesia Power Services</p>
-            <p className="text-xs text-gray-500 mt-0.5">Unit Bisnis Pembangkitan Cilegon</p>
+            <h1 className="text-lg font-bold text-gray-900 uppercase tracking-widest">PT PLN Indonesia Power Services</h1>
+            <p className="text-[10px] text-gray-600 uppercase tracking-wider mt-1">Head Office — Jl. Raya Pasar Minggu No.190, Jakarta Selatan</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">Telp: (6221) 2178 9990 | info@plnipservices.co.id</p>
           </div>
         </div>
 

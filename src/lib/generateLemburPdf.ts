@@ -105,19 +105,19 @@ export async function generateLemburPdf(
     doc.text("PLN IP SERVICES", mL, y + 10);
   }
 
-  // Teks Kop Surat di tengah atau kanan (mengikuti standar biasa)
+  // Teks Kop Surat — Head Office
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(0, 0, 0); // Black for formal docs
+  doc.setFontSize(13);
+  doc.setTextColor(0, 0, 0);
   doc.text("PT PLN INDONESIA POWER SERVICES", W / 2 + 10, y + 5, { align: "center" });
-  
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text("Unit Bisnis Pembangkitan (UBP) Cilegon", W / 2 + 10, y + 10, { align: "center" });
-  doc.setFontSize(9);
-  doc.text("Jl. Indag Raya No.1, Cilegon, Banten 42445", W / 2 + 10, y + 14.5, { align: "center" });
 
-  y += 20;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text("Head Office — Jl. Raya Pasar Minggu No.190, Pejaten Bar., Ps. Minggu, Jakarta Selatan 12510", W / 2 + 10, y + 10.5, { align: "center" });
+  doc.setFontSize(8);
+  doc.text("Telp: (6221) 2178 9990   |   info@plnipservices.co.id", W / 2 + 10, y + 15.5, { align: "center" });
+
+  y += 22;
 
   // Garis Kop Surat (Ganda)
   doc.setDrawColor(0, 0, 0);
@@ -328,7 +328,7 @@ export async function generateLemburPdf(
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      `Dicetak dari Sistem ALUR pada ${new Date().toLocaleString("id-ID")} | PT PLN Indonesia Power Services`,
+      `Dicetak dari Sistem ALUR pada ${new Date().toLocaleString("id-ID")} | PT PLN Indonesia Power Services — Head Office Jakarta`,
       W / 2, pageH - 15,
       { align: "center" }
     );

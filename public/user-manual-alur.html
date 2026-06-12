@@ -9,17 +9,13 @@
     /* ================================================================
        RESET & BASE
     ================================================================ */
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    html {
-      font-size: 11pt;
-    }
+    html { font-size: 11pt; }
 
     body {
       font-family: "Times New Roman", Times, serif;
@@ -29,43 +25,95 @@
     }
 
     /* ================================================================
-       PRINT SETUP
+       PAGE SETUP  (applies at all times, including print)
     ================================================================ */
-    @media print {
-      body {
-        font-size: 10.5pt;
-      }
-
-      .no-print {
-        display: none !important;
-      }
-
-      .page-break {
-        page-break-before: always;
-      }
-
-      .avoid-break {
-        page-break-inside: avoid;
-      }
-
-      a {
-        color: #000;
-        text-decoration: none;
-      }
-
-      .toc-link {
-        text-decoration: none;
-        color: #000;
-      }
-    }
-
     @page {
       size: A4;
       margin: 2.5cm 2.5cm 2.5cm 3cm;
     }
 
     /* ================================================================
-       COVER PAGE
+       PRINT MEDIA — minimal, non-conflicting rules only
+    ================================================================ */
+    @media print {
+      /* Force browser to render background colors & images */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      /* Hide on-screen-only elements */
+      .no-print { display: none !important; }
+
+      /* ── Cover page ──
+         Reduce padding & keep flex so content fits on exactly 1 A4 page.
+         DO NOT add break-after — the first .page-break section handles the transition. */
+      .cover-page {
+        margin: 0 !important;
+        border: 2px solid #000 !important;
+        padding: 20px 30px !important;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      /* Shrink all cover child margins so content fits on 1 page */
+      .cover-logos       { margin-bottom: 14px !important; }
+      .cover-company     { margin-bottom: 14px !important; }
+      .cover-title-label { margin-bottom: 10px !important; }
+      .cover-title       { margin-bottom: 6px !important; }
+      .cover-subtitle    { margin-bottom: 14px !important; }
+      .cover-version-box { margin-bottom: 14px !important; padding: 10px 20px !important; }
+      .cover-footer      { color: #000 !important; }
+
+      /* Shrink the ALUR text spacing */
+      .cover-page > div[style*="margin-bottom: 50px"],
+      .cover-page > div[style*="margin-bottom:50px"] {
+        margin-bottom: 14px !important;
+      }
+
+      /* ── Chapter / section breaks ──
+         Each .page-break div starts on a new page. */
+      .page-break {
+        break-before: page;
+        page-break-before: always;
+      }
+
+      /* ── Avoid splitting small blocks across pages ── */
+      .avoid-break {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* ── Container ── */
+      .container { padding: 0; max-width: 100%; }
+
+      /* ── Links ── */
+      a, .toc-link { color: #000; text-decoration: none; }
+
+      /* ── Tables ──
+         Allow tables to break across pages, but keep rows together */
+      table  { break-inside: auto; page-break-inside: auto; }
+      tr     { break-inside: avoid; page-break-inside: avoid; }
+
+      /* ── Keep headings with their first line of content ── */
+      h2, h3 { break-after: avoid; page-break-after: avoid; }
+
+      /* ── Ensure all text stays black ── */
+      p, li, td, h1, h2, h3, h4, span, em, strong, div { color: #000; }
+
+      /* ── Table header: white text on black background ── */
+      th {
+        color: #fff !important;
+        background: #000 !important;
+      }
+
+      /* ── Footer doc ── */
+      .doc-footer { margin-top: 24px; }
+    }
+
+    /* ================================================================
+       COVER PAGE  (screen + print)
     ================================================================ */
     .cover-page {
       min-height: 100vh;
@@ -77,6 +125,7 @@
       padding: 60px 40px;
       border: 3px solid #000;
       margin: 20px;
+      box-sizing: border-box;
     }
 
     .cover-logos {
@@ -178,19 +227,6 @@
       padding: 40px 20px;
     }
 
-    @media print {
-      .container {
-        padding: 0;
-        max-width: 100%;
-      }
-
-      .cover-page {
-        margin: 0;
-        border: none;
-        min-height: auto;
-      }
-    }
-
     /* ================================================================
        TYPOGRAPHY
     ================================================================ */
@@ -229,34 +265,17 @@
       margin-bottom: 6px;
     }
 
-    p {
-      margin-bottom: 8px;
-      text-align: justify;
-    }
+    p { margin-bottom: 8px; text-align: justify; }
 
-    ul,
-    ol {
-      margin: 8px 0 12px 24px;
-    }
-
-    li {
-      margin-bottom: 4px;
-    }
-
-    strong {
-      font-weight: bold;
-    }
-
-    em {
-      font-style: italic;
-    }
+    ul, ol { margin: 8px 0 12px 24px; }
+    li { margin-bottom: 4px; }
+    strong { font-weight: bold; }
+    em { font-style: italic; }
 
     /* ================================================================
        TABLE OF CONTENTS
     ================================================================ */
-    .toc {
-      margin: 20px 0;
-    }
+    .toc { margin: 20px 0; }
 
     .toc-entry {
       display: flex;
@@ -264,15 +283,8 @@
       margin-bottom: 5px;
     }
 
-    .toc-num {
-      font-weight: bold;
-      min-width: 28px;
-      flex-shrink: 0;
-    }
-
-    .toc-text {
-      flex: 1;
-    }
+    .toc-num { font-weight: bold; min-width: 28px; flex-shrink: 0; }
+    .toc-text { flex: 1; }
 
     .toc-dots {
       flex: 1;
@@ -282,23 +294,13 @@
       top: -3px;
     }
 
-    .toc-page {
-      min-width: 24px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .toc-sub {
-      margin-left: 24px;
-      font-size: 10pt;
-    }
+    .toc-page { min-width: 24px; text-align: right; flex-shrink: 0; }
+    .toc-sub  { margin-left: 24px; font-size: 10pt; }
 
     /* ================================================================
        SECTION HEADER
     ================================================================ */
-    .section {
-      margin-top: 40px;
-    }
+    .section { margin-top: 40px; }
 
     .section-number {
       font-size: 10pt;
@@ -326,6 +328,9 @@
       padding: 7px 10px;
       text-align: left;
       font-size: 9.5pt;
+      /* Force Chrome to print this background color */
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     td {
@@ -334,9 +339,7 @@
       vertical-align: top;
     }
 
-    tr:nth-child(even) td {
-      background: #f5f5f5;
-    }
+    tr:nth-child(even) td { background: #f5f5f5; }
 
     /* ================================================================
        CALLOUT BOXES
@@ -405,19 +408,6 @@
     }
 
     /* ================================================================
-       ROLE MATRIX
-    ================================================================ */
-    .role-pill {
-      display: inline-block;
-      border: 1px solid #000;
-      padding: 1px 7px;
-      font-size: 8.5pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin: 1px;
-    }
-
-    /* ================================================================
        HORIZONTAL RULE
     ================================================================ */
     hr.section-divider {
@@ -426,10 +416,7 @@
       margin: 32px 0;
     }
 
-    hr.thin {
-      border-top: 1px solid #ccc;
-      margin: 16px 0;
-    }
+    hr.thin { border-top: 1px solid #ccc; margin: 16px 0; }
 
     /* ================================================================
        FOOTER STAMP
@@ -445,7 +432,7 @@
     }
 
     /* ================================================================
-       PRINT BUTTON (no-print)
+       PRINT BUTTON (screen only)
     ================================================================ */
     .print-btn {
       position: fixed;
@@ -464,10 +451,9 @@
       z-index: 999;
     }
 
-    .print-btn:hover {
-      background: #333;
-    }
+    .print-btn:hover { background: #333; }
   </style>
+
 </head>
 
 <body>
@@ -489,8 +475,8 @@
 
     <div class="cover-company">
       PT PLN Indonesia Power Services<br />
-      UBP Cilegon — Bidang Operasi, SDM &amp; Keuangan,<br />
-      Pemeliharaan, dan Engineering
+      Head Office — Jl. Raya Pasar Minggu No.190<br />
+      Pejaten Bar., Ps. Minggu, Jakarta Selatan 12510
     </div>
 
     <div class="cover-title-label">Dokumen Resmi</div>
@@ -745,7 +731,7 @@
     <!-- ================================================================
        BAB 1 — PENDAHULUAN
   ================================================================ -->
-    <div class="page-break section avoid-break">
+    <div class="page-break section">
       <p class="section-number">Bab 1</p>
       <h1>PENDAHULUAN</h1>
       <hr class="thin" />
@@ -1925,84 +1911,6 @@
     </div>
 
     <!-- ================================================================
-       BAB 9 — FAQ
-  ================================================================ -->
-    <div class="page-break section">
-      <p class="section-number">Bab 9</p>
-      <h1>PERTANYAAN UMUM (FAQ)</h1>
-      <hr class="thin" />
-
-      <h3>1. Mengapa saya tidak bisa melakukan Clock In padahal GPS sudah aktif?</h3>
-      <p>
-        Pastikan browser Anda memiliki izin akses lokasi. Klik ikon gembok atau lokasi di address bar
-        browser, pilih "Izinkan", lalu muat ulang halaman. Jika masih tidak berhasil, coba gunakan
-        browser berbeda atau perangkat lain.
-      </p>
-
-      <h3>2. Saya tidak menerima email notifikasi approval. Apa yang harus dilakukan?</h3>
-      <p>
-        Periksa folder Spam/Junk pada email perusahaan Anda. Jika email tidak ada di folder Spam,
-        hubungi Super Admin untuk memastikan alamat email yang terdaftar di sistem sudah benar
-        dan aktif.
-      </p>
-
-      <h3>3. Tautan approval di email sudah tidak bisa digunakan.</h3>
-      <p>
-        Tautan persetujuan memiliki masa berlaku terbatas. Jika sudah kedaluwarsa, login ke sistem
-        menggunakan akun Anda dan lakukan persetujuan melalui halaman Antrian Approval
-        (<em>menu "Approval"</em> di navigasi atas).
-      </p>
-
-      <h3>4. Saya sudah Clock In tetapi lupa Clock Out dan menutup browser.</h3>
-      <p>
-        Data Clock In tersimpan di <em>local storage</em> browser yang sama. Buka kembali halaman
-        Form Lembur di browser dan perangkat yang sama, data Clock In akan muncul kembali secara
-        otomatis. Lakukan Clock Out dan lengkapi pengajuan.
-      </p>
-
-      <h3>5. Apakah pengajuan yang ditolak dapat diajukan ulang?</h3>
-      <p>
-        Ya. Pengajuan yang ditolak tidak dapat dilanjutkan, tetapi pegawai dapat membuat pengajuan
-        baru dengan data yang telah diperbaiki sesuai alasan penolakan dari approver.
-      </p>
-
-      <h3>6. Berapa lama proses approval berlangsung?</h3>
-      <p>
-        Durasi proses approval bergantung pada respons setiap approver. Sistem akan mengirimkan
-        email notifikasi kepada setiap approver ketika tiba gilirannya. Tidak ada batas waktu
-        sistem yang otomatis; namun secara prosedural, setiap tahap diharapkan diselesaikan
-        dalam 1×24 jam kerja.
-      </p>
-
-      <h3>7. Mengapa kolom Penugas tidak menampilkan nama atasan saya?</h3>
-      <p>
-        Daftar penugas diisi oleh sistem berdasarkan Asisten Manager dan Manager yang terdaftar
-        di bidang yang sama dengan pegawai. Jika nama atasan tidak muncul, kemungkinan peran
-        atau bidang atasan tersebut belum disetel dengan benar. Hubungi Super Admin.
-      </p>
-
-      <h3>8. Saya tidak bisa mengakses halaman Admin / Super Admin.</h3>
-      <p>
-        Akses halaman tersebut memerlukan peran yang sesuai. Jika Anda seharusnya memiliki akses
-        tersebut, hubungi Super Admin untuk memeriksa dan memperbaiki peran akun Anda.
-      </p>
-
-      <h3>9. Bagaimana cara melihat SPKL saya yang sudah disetujui?</h3>
-      <p>
-        Buka halaman Riwayat Lembur, klik pengajuan yang berstatus APPROVED, dan nomor SPKL
-        akan tertera di halaman Detail. Untuk mengunduh dokumen SPKL dalam format PDF,
-        hubungi Admin yang memiliki akses unduh dokumen.
-      </p>
-
-      <h3>10. Data di export Excel berbeda dari yang ditampilkan di layar Admin.</h3>
-      <p>
-        Pastikan filter yang digunakan saat export sama dengan filter yang aktif di layar.
-        Export Excel akan mengikuti semua parameter filter yang sedang aktif (bulan, bidang,
-        status, kategori).
-      </p>
-    </div>
-
-    <!-- ================================================================
        BAB 8 — PERSETUJUAN VIA EMAIL & VALIDASI DOKUMEN
   ================================================================ -->
     <div class="page-break section">
@@ -2500,7 +2408,9 @@
     <div class="doc-footer">
       <div>
         <strong>ALUR — Sistem Manajemen Lembur &amp; Piket</strong><br />
-        PT PLN Indonesia Power Services | UBP Cilegon<br />
+        PT PLN Indonesia Power Services | Head Office<br />
+        Jl. Raya Pasar Minggu No.190, Jakarta Selatan 12510<br />
+        Telp: (6221) 2178 9990 | Email: info@plnipservices.co.id<br />
         <em>Developed by Dzulfikar Adam Sangaji</em>
       </div>
       <div style="text-align:right;">

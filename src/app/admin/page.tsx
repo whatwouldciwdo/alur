@@ -349,7 +349,9 @@ export default function AdminPage() {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(40, 40, 40);
-      doc.text("Unit Bisnis Pembangkitan Cilegon", centerX, 16, { align: "center" });
+      doc.text("Head Office — Jl. Raya Pasar Minggu No.190, Pejaten Bar., Ps. Minggu, Jakarta Selatan 12510", centerX, 15, { align: "center" });
+      doc.setFontSize(8);
+      doc.text("Telp: (6221) 2178 9990   |   info@plnipservices.co.id", centerX, 20, { align: "center" });
 
       doc.setDrawColor(0, 105, 52);
       doc.setLineWidth(0.8);
@@ -416,7 +418,9 @@ export default function AdminPage() {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(40, 40, 40);
-        doc.text("Unit Bisnis Pembangkitan Cilegon", centerX, 16, { align: "center" });
+        doc.text("Head Office — Jl. Raya Pasar Minggu No.190, Pejaten Bar., Ps. Minggu, Jakarta Selatan 12510", centerX, 15, { align: "center" });
+        doc.setFontSize(8);
+        doc.text("Telp: (6221) 2178 9990   |   info@plnipservices.co.id", centerX, 20, { align: "center" });
         doc.setDrawColor(0, 105, 52);
         doc.setLineWidth(0.8);
         doc.line(marginX, kopH, pageW - marginX, kopH);

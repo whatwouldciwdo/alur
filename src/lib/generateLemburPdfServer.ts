@@ -122,15 +122,16 @@ export async function generateLemburPdfServer(
   // ── Company info ─────────────────────────────────────────────────────────────
   const cxStart = mL + 47;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(10);
   doc.setTextColor(...DARK_BLUE);
   doc.text("PT PLN INDONESIA POWER SERVICES", cxStart, y + 5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...GRAY);
-  doc.text("Unit Bisnis Pembangkitan (UBP) Cilegon", cxStart, y + 10);
-  doc.text("Jl. Indag Raya No.1, Cilegon, Banten 42445", cxStart, y + 14.5);
-  y += 20;
+  doc.text("Head Office — Jl. Raya Pasar Minggu No.190, Pejaten Bar., Ps. Minggu, Jakarta Selatan 12510", cxStart, y + 10.5);
+  doc.setFontSize(7.5);
+  doc.text("Telp: (6221) 2178 9990   |   info@plnipservices.co.id", cxStart, y + 15.5);
+  y += 22;
 
   // ── Double divider ────────────────────────────────────────────────────────────
   doc.setDrawColor(...DARK_BLUE);
@@ -348,7 +349,7 @@ export async function generateLemburPdfServer(
   doc.setFontSize(7);
   doc.setTextColor(200, 220, 255);
   doc.text(
-    `Dicetak: ${new Date().toLocaleString("id-ID")}  ·  Sistem ALUR — PT PLN Indonesia Power Services UBP Cilegon`,
+    `Dicetak: ${new Date().toLocaleString("id-ID")}  ·  Sistem ALUR — PT PLN Indonesia Power Services — Head Office Jakarta`,
     W / 2, footerY + 5, { align: "center" }
   );
 
