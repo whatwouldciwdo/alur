@@ -84,6 +84,16 @@ export async function GET(req: NextRequest) {
         month: "long",
         year: "numeric",
       }),
+      "Jam Mulai": new Date(l.tanggalMulai).toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      "Jam Selesai": new Date(l.tanggalSelesai).toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
       Durasi: formatDurasi(new Date(l.tanggalMulai), new Date(l.tanggalSelesai)),
       Deskripsi: l.deskripsi,
       Penugas: l.penugas ?? "-",
@@ -94,10 +104,23 @@ export async function GET(req: NextRequest) {
 
   const ws = XLSX.utils.json_to_sheet(rows);
   const colWidths = [
-    { wch: 5 }, { wch: 10 }, { wch: 35 },
-    { wch: 30 }, { wch: 15 }, { wch: 25 },
-    { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 22 },
-    { wch: 12 }, { wch: 50 }, { wch: 25 }, { wch: 15 }, { wch: 30 },
+    { wch: 5 },  // No
+    { wch: 10 }, // Kategori
+    { wch: 35 }, // Nomor SPKL
+    { wch: 30 }, // Nama
+    { wch: 15 }, // NIP
+    { wch: 25 }, // Jabatan
+    { wch: 20 }, // Bidang
+    { wch: 20 }, // Sub Bidang
+    { wch: 22 }, // Tanggal Mulai
+    { wch: 22 }, // Tanggal Selesai
+    { wch: 10 }, // Jam Mulai
+    { wch: 10 }, // Jam Selesai
+    { wch: 12 }, // Durasi
+    { wch: 50 }, // Deskripsi
+    { wch: 25 }, // Penugas
+    { wch: 15 }, // Status
+    { wch: 30 }, // Disetujui Oleh
   ];
   ws["!cols"] = colWidths;
 
