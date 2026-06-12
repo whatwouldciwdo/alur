@@ -32,6 +32,7 @@ export default async function RootLayout({
   return (
     <html lang="id">
       <body className="bg-background text-on-background min-h-screen flex flex-col">
+        <div dangerouslySetInnerHTML={{ __html: "<!-- Developed by Dzulfikar Adam Sangaji | @arxenovasocial.com -->" }} />
         <SessionProvider session={session}>
           <Navbar />
           <div className="flex flex-col flex-grow">{children}</div>

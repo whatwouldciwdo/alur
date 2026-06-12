@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Manual — Sistem Manajemen Lembur ALUR</title>
+  <style>
+    /* ================================================================
+       RESET & BASE
+    ================================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 11pt;
+    }
+
+    body {
+      font-family: "Times New Roman", Times, serif;
+      color: #000;
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ================================================================
+       PRINT SETUP
+    ================================================================ */
+    @media print {
+      body {
+        font-size: 10.5pt;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+      .avoid-break {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: #000;
+        text-decoration: none;
+      }
+
+      .toc-link {
+        text-decoration: none;
+        color: #000;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 2.5cm 2.5cm 2.5cm 3cm;
+    }
+
+    /* ================================================================
+       COVER PAGE
+    ================================================================ */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 40px;
+      border: 3px solid #000;
+      margin: 20px;
+    }
+
+    .cover-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .cover-logos img {
+      height: 80px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .cover-logo-divider {
+      width: 1px;
+      height: 70px;
+      background: #000;
+    }
+
+    .cover-company {
+      font-size: 10pt;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 60px;
+      line-height: 1.8;
+    }
+
+    .cover-title-label {
+      font-size: 10pt;
+      font-weight: normal;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 8px 40px;
+      margin-bottom: 20px;
+    }
+
+    .cover-title {
+      font-size: 24pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .cover-subtitle {
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 60px;
+    }
+
+    .cover-version-box {
+      border: 1px solid #000;
+      padding: 16px 40px;
+      margin-bottom: 60px;
+      text-align: left;
+      min-width: 320px;
+    }
+
+    .cover-version-box table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cover-version-box td {
+      padding: 3px 8px 3px 0;
+      font-size: 10pt;
+      vertical-align: top;
+    }
+
+    .cover-version-box td:first-child {
+      font-weight: bold;
+      white-space: nowrap;
+      padding-right: 16px;
+    }
+
+    .cover-footer {
+      font-size: 9pt;
+      color: #333;
+      border-top: 1px solid #000;
+      padding-top: 16px;
+      width: 100%;
+    }
+
+    /* ================================================================
+       LAYOUT / CONTENT
+    ================================================================ */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    @media print {
+      .container {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .cover-page {
+        margin: 0;
+        border: none;
+        min-height: auto;
+      }
+    }
+
+    /* ================================================================
+       TYPOGRAPHY
+    ================================================================ */
+    h1 {
+      font-size: 18pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 32px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    h4 {
+      font-size: 10.5pt;
+      font-weight: bold;
+      font-style: italic;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+
+    ul,
+    ol {
+      margin: 8px 0 12px 24px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    /* ================================================================
+       TABLE OF CONTENTS
+    ================================================================ */
+    .toc {
+      margin: 20px 0;
+    }
+
+    .toc-entry {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+
+    .toc-num {
+      font-weight: bold;
+      min-width: 28px;
+      flex-shrink: 0;
+    }
+
+    .toc-text {
+      flex: 1;
+    }
+
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted #000;
+      margin: 0 6px;
+      position: relative;
+      top: -3px;
+    }
+
+    .toc-page {
+      min-width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .toc-sub {
+      margin-left: 24px;
+      font-size: 10pt;
+    }
+
+    /* ================================================================
+       SECTION HEADER
+    ================================================================ */
+    .section {
+      margin-top: 40px;
+    }
+
+    .section-number {
+      font-size: 10pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #000;
+      margin-bottom: 4px;
+    }
+
+    /* ================================================================
+       TABLES
+    ================================================================ */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 16px 0;
+      font-size: 10pt;
+    }
+
+    th {
+      background: #000;
+      color: #fff;
+      font-weight: bold;
+      padding: 7px 10px;
+      text-align: left;
+      font-size: 9.5pt;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #888;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f5f5f5;
+    }
+
+    /* ================================================================
+       CALLOUT BOXES
+    ================================================================ */
+    .note-box {
+      border: 1px solid #000;
+      border-left: 4px solid #000;
+      padding: 10px 14px;
+      margin: 12px 0;
+      background: #f9f9f9;
+      font-size: 10pt;
+    }
+
+    .note-box .note-label {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 9pt;
+      margin-bottom: 4px;
+    }
+
+    .warning-box {
+      border: 1px solid #000;
+      border-left: 4px solid #000;
+      padding: 10px 14px;
+      margin: 12px 0;
+      background: #fff;
+      font-size: 10pt;
+    }
+
+    .warning-box .note-label {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 9pt;
+      margin-bottom: 4px;
+    }
+
+    /* ================================================================
+       STEP LIST
+    ================================================================ */
+    .step-list {
+      list-style: none;
+      margin: 10px 0 14px 0;
+      padding: 0;
+    }
+
+    .step-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 10.5pt;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      border: 2px solid #000;
+      font-weight: bold;
+      font-size: 9pt;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ================================================================
+       ROLE MATRIX
+    ================================================================ */
+    .role-pill {
+      display: inline-block;
+      border: 1px solid #000;
+      padding: 1px 7px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 1px;
+    }
+
+    /* ================================================================
+       HORIZONTAL RULE
+    ================================================================ */
+    hr.section-divider {
+      border: none;
+      border-top: 1px solid #000;
+      margin: 32px 0;
+    }
+
+    hr.thin {
+      border-top: 1px solid #ccc;
+      margin: 16px 0;
+    }
+
+    /* ================================================================
+       FOOTER STAMP
+    ================================================================ */
+    .doc-footer {
+      margin-top: 60px;
+      padding-top: 12px;
+      border-top: 1px solid #000;
+      font-size: 9pt;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    /* ================================================================
+       PRINT BUTTON (no-print)
+    ================================================================ */
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      font-family: inherit;
+      font-size: 10pt;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    .print-btn:hover {
+      background: #333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- PRINT BUTTON -->
+  <button class="print-btn no-print" onclick="window.print()">Cetak / Export PDF</button>
+
+  <!-- ================================================================
+     COVER PAGE
+================================================================ -->
+  <div class="cover-page">
+
+    <div class="cover-logos">
+      <img src="./image/Logo-PLN-Indonesiapower-Services.png" alt="PLN Indonesia Power Services"
+        onerror="this.style.display='none'" />
+      <div class="cover-logo-divider"></div>
+      <img src="./image/ranger-application-logo.jpg" alt="RANGER" onerror="this.style.display='none'" />
+    </div>
+
+    <div class="cover-company">
+      PT PLN Indonesia Power Services<br />
+      UBP Cilegon — Bidang Operasi, SDM &amp; Keuangan,<br />
+      Pemeliharaan, dan Engineering
+    </div>
+
+    <div class="cover-title-label">Dokumen Resmi</div>
+    <div class="cover-title">User Manual</div>
+    <div class="cover-subtitle">Sistem Manajemen Lembur &amp; Piket</div>
+    <div style="font-size: 16pt; font-weight:bold; letter-spacing:0.3em; margin-bottom: 50px;">A L U R</div>
+
+    <div class="cover-version-box">
+      <table>
+        <tr>
+          <td>Nama Aplikasi</td>
+          <td>: ALUR — Sistem Manajemen Lembur &amp; Piket</td>
+        </tr>
+        <tr>
+          <td>Versi Dokumen</td>
+          <td>: 1.0</td>
+        </tr>
+        <tr>
+          <td>Tanggal</td>
+          <td>: Juni 2026</td>
+        </tr>
+        <tr>
+          <td>Developer</td>
+          <td>: Dzulfikar Adam Sangaji</td>
+        </tr>
+        <tr>
+          <td>Klasifikasi</td>
+          <td>: Internal — Terbatas</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="cover-footer">
+      Dokumen ini bersifat internal dan hanya diperuntukkan bagi pengguna resmi sistem ALUR.<br />
+      Dilarang menyebarkan tanpa izin dari pihak yang berwenang.
+    </div>
+  </div>
+
+  <!-- ================================================================
+     MAIN CONTENT
+================================================================ -->
+  <div class="container">
+
+    <!-- ── DAFTAR ISI ── -->
+    <div class="page-break section">
+      <p class="section-number">Daftar Isi</p>
+      <h1>DAFTAR ISI</h1>
+      <hr class="thin" />
+
+      <div class="toc">
+        <div class="toc-entry">
+          <span class="toc-num">1.</span>
+          <span class="toc-text">Pendahuluan</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">3</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">1.1</span>
+          <span class="toc-text">Latar Belakang</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">3</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">1.2</span>
+          <span class="toc-text">Tujuan Dokumen</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">3</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">1.3</span>
+          <span class="toc-text">Ruang Lingkup</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">3</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">2.</span>
+          <span class="toc-text">Hierarki Peran &amp; Akses</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">4</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">3.</span>
+          <span class="toc-text">Alur Kerja Sistem</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">5</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">4.</span>
+          <span class="toc-text">Panduan Pengguna Umum (Pegawai)</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">6</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.1</span>
+          <span class="toc-text">Login ke Sistem</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">6</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.2</span>
+          <span class="toc-text">Dashboard</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">7</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.3</span>
+          <span class="toc-text">Pengajuan Lembur / Piket</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">7</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.4</span>
+          <span class="toc-text">Verifikasi Lokasi</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">9</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.5</span>
+          <span class="toc-text">Riwayat Lembur</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">10</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.6</span>
+          <span class="toc-text">Detail Lembur</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">10</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">4.7</span>
+          <span class="toc-text">Profil Pengguna</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">11</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">5.</span>
+          <span class="toc-text">Panduan Approver (Officer, TL, Asman, Manager, Branch Manager)</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">12</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">5.1</span>
+          <span class="toc-text">Halaman Antrian Approval</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">12</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">5.2</span>
+          <span class="toc-text">Proses Persetujuan melalui Email</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">12</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">5.3</span>
+          <span class="toc-text">Tindakan: Setuju, Tolak, Minta Revisi</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">13</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">6.</span>
+          <span class="toc-text">Panduan Admin</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">14</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.1</span>
+          <span class="toc-text">Akses Halaman Admin</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">14</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.2</span>
+          <span class="toc-text">Statistik Rekap</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">14</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.3</span>
+          <span class="toc-text">Filter &amp; Pencarian Data</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">15</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.4</span>
+          <span class="toc-text">Persetujuan Akhir oleh Admin</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">15</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.5</span>
+          <span class="toc-text">Export Data Excel (XLSX)</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">16</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">6.6</span>
+          <span class="toc-text">Export SPKL PDF per Pengajuan</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">16</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">7.</span>
+          <span class="toc-text">Panduan Super Admin</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">17</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">7.1</span>
+          <span class="toc-text">Manajemen Pengguna</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">17</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">7.2</span>
+          <span class="toc-text">Tambah Pengguna Baru</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">18</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">7.3</span>
+          <span class="toc-text">Edit Data Pengguna</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">18</span>
+        </div>
+        <div class="toc-entry toc-sub">
+          <span class="toc-num">7.4</span>
+          <span class="toc-text">Reset Password Pengguna</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">19</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">8.</span>
+          <span class="toc-text">Nomor SPKL &amp; Dokumen Resmi</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">20</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">9.</span>
+          <span class="toc-text">Pertanyaan Umum (FAQ)</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">21</span>
+        </div>
+        <div class="toc-entry">
+          <span class="toc-num">10.</span>
+          <span class="toc-text">Kontak &amp; Dukungan Teknis</span>
+          <span class="toc-dots"></span>
+          <span class="toc-page">22</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 1 — PENDAHULUAN
+  ================================================================ -->
+    <div class="page-break section avoid-break">
+      <p class="section-number">Bab 1</p>
+      <h1>PENDAHULUAN</h1>
+      <hr class="thin" />
+
+      <h2>1.1 Latar Belakang</h2>
+      <p>
+        Sistem ALUR (<em>Alur Lembur</em>) adalah platform manajemen digital untuk pengelolaan pengajuan
+        lembur dan piket di lingkungan PT PLN Indonesia Power Services, UBP Cilegon. Sistem ini dirancang
+        untuk menggantikan proses manual berbasis kertas yang memerlukan waktu panjang dalam proses
+        persetujuan berjenjang.
+      </p>
+      <p>
+        Dengan ALUR, seluruh proses dari pengajuan, penerusan ke approver, persetujuan bertahap,
+        hingga penerbitan Surat Perintah Kerja Lembur (SPKL) dilakukan secara digital dan terdokumentasi
+        secara otomatis.
+      </p>
+
+      <h2>1.2 Tujuan Dokumen</h2>
+      <p>Dokumen ini bertujuan untuk:</p>
+      <ul>
+        <li>Memberikan panduan penggunaan sistem kepada seluruh pengguna sesuai peran masing-masing.</li>
+        <li>Menjelaskan alur kerja dan aturan bisnis yang berlaku dalam sistem.</li>
+        <li>Menjadi referensi resmi dalam pelatihan dan orientasi pengguna baru.</li>
+      </ul>
+
+      <h2>1.3 Ruang Lingkup</h2>
+      <p>Sistem ALUR mencakup:</p>
+      <ul>
+        <li>Pengajuan lembur dan piket oleh pegawai dengan verifikasi lokasi.</li>
+        <li>Proses persetujuan berjenjang hingga 5 (lima) tahap.</li>
+        <li>Notifikasi email otomatis kepada setiap approver.</li>
+        <li>Penerbitan SPKL (Surat Perintah Kerja Lembur) dalam format PDF.</li>
+        <li>Rekap data dan ekspor laporan dalam format Excel.</li>
+        <li>Manajemen pengguna oleh Super Admin.</li>
+      </ul>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Catatan Penting</div>
+        Sistem ALUR merupakan aplikasi berbasis web yang diakses melalui browser.
+        Tidak diperlukan instalasi perangkat lunak tambahan. Pengguna cukup membuka
+        alamat URL yang telah ditetapkan melalui browser di komputer atau perangkat seluler.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 2 — HIERARKI PERAN
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 2</p>
+      <h1>HIERARKI PERAN &amp; AKSES</h1>
+      <hr class="thin" />
+
+      <p>
+        Sistem ALUR menggunakan model akses berbasis peran (<em>Role-Based Access Control</em>).
+        Setiap pengguna memiliki satu peran yang menentukan fitur yang dapat diakses dan posisi
+        dalam alur persetujuan.
+      </p>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Peran</th>
+            <th>Kode Sistem</th>
+            <th>Deskripsi &amp; Hak Akses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Pegawai</strong></td>
+            <td><code>PEGAWAI</code></td>
+            <td>Mengajukan lembur/piket, melihat riwayat dan status pengajuan milik sendiri.</td>
+          </tr>
+          <tr>
+            <td><strong>Officer</strong></td>
+            <td><code>OFFICER</code></td>
+            <td>Approver tahap pertama dalam rantai persetujuan (khusus beberapa sub-bidang).</td>
+          </tr>
+          <tr>
+            <td><strong>Team Leader (TL)</strong></td>
+            <td><code>TL</code></td>
+            <td>Approver untuk pegawai shift. Menyetujui/menolak pengajuan sesuai grup shift.</td>
+          </tr>
+          <tr>
+            <td><strong>Asisten Manager</strong></td>
+            <td><code>ASMAN</code></td>
+            <td>Approver tingkat menengah. Menerima pengajuan setelah TL/Officer menyetujui.</td>
+          </tr>
+          <tr>
+            <td><strong>Manager</strong></td>
+            <td><code>MANAGER</code></td>
+            <td>Approver senior. Menyetujui setelah Asman. Pada beberapa bidang, merupakan tahap akhir sebelum Admin.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Branch Manager</strong></td>
+            <td><code>BRANCH_MANAGER</code></td>
+            <td>Approver tertinggi dalam rantai persetujuan operasional. Persetujuan bersifat final pada level
+              manajemen.</td>
+          </tr>
+          <tr>
+            <td><strong>Admin</strong></td>
+            <td><code>ADMIN</code></td>
+            <td>Mengelola rekap data, menyetujui pengajuan pada tahap akhir, mengekspor laporan, dan menerbitkan nomor
+              SPKL.</td>
+          </tr>
+          <tr>
+            <td><strong>Super Admin</strong></td>
+            <td><code>SUPER_ADMIN</code></td>
+            <td>Akses penuh termasuk manajemen seluruh pengguna: tambah, edit, reset password, ubah peran dan bidang.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Matriks Akses Fitur</h3>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Fitur</th>
+            <th>PEGAWAI</th>
+            <th>OFFICER/TL/ASMAN/MANAGER/BM</th>
+            <th>ADMIN</th>
+            <th>SUPER ADMIN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dashboard</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+          </tr>
+          <tr>
+            <td>Ajukan Lembur / Piket</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+          </tr>
+          <tr>
+            <td>Riwayat Pengajuan</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+          </tr>
+          <tr>
+            <td>Antrian Approval</td>
+            <td>&#8212;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#8212;</td>
+          </tr>
+          <tr>
+            <td>Halaman Admin (Rekap)</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+            <td>&#10003;</td>
+            <td>&#8212;</td>
+          </tr>
+          <tr>
+            <td>Export Excel / PDF</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+            <td>&#10003;</td>
+            <td>&#8212;</td>
+          </tr>
+          <tr>
+            <td>Manajemen Pengguna</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+            <td>&#8212;</td>
+            <td>&#10003;</td>
+          </tr>
+          <tr>
+            <td>Profil Sendiri</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================================================================
+       BAB 3 — ALUR KERJA SISTEM
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 3</p>
+      <h1>ALUR KERJA SISTEM</h1>
+      <hr class="thin" />
+
+      <p>
+        Berikut adalah alur kerja standar pengajuan lembur dari awal hingga penerbitan SPKL.
+        Sistem secara otomatis meneruskan pengajuan ke tahap berikutnya setelah setiap persetujuan diberikan.
+      </p>
+
+      <h3>Diagram Alur Persetujuan</h3>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Tahap</th>
+            <th>Pelaksana</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tahap 0</strong></td>
+            <td>Pegawai</td>
+            <td>Pegawai mengisi form lembur dengan Clock In, Clock Out, Dasar dan Uraian pekerjaan, serta nama penugas.
+              Pengajuan dikirim ke sistem.</td>
+          </tr>
+          <tr>
+            <td><strong>Tahap 1</strong></td>
+            <td>Officer / Team Leader</td>
+            <td>Sistem mengirim email notifikasi ke Officer atau TL yang bersangkutan. Approver membuka tautan di email
+              atau masuk ke sistem untuk memberikan persetujuan.</td>
+          </tr>
+          <tr>
+            <td><strong>Tahap 2</strong></td>
+            <td>Asisten Manager</td>
+            <td>Setelah tahap 1 disetujui, email dikirim ke Asman. Asman memeriksa dan memberikan keputusan.</td>
+          </tr>
+          <tr>
+            <td><strong>Tahap 3</strong></td>
+            <td>Manager</td>
+            <td>Setelah tahap 2 disetujui, email dikirim ke Manager bidang.</td>
+          </tr>
+          <tr>
+            <td><strong>Tahap 4</strong></td>
+            <td>Branch Manager</td>
+            <td>Persetujuan tingkat pimpinan tertinggi operasional. (Beberapa bidang mungkin tidak memiliki tahap ini.)
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Tahap Akhir</strong></td>
+            <td>Admin</td>
+            <td>Admin memberikan persetujuan final. Sistem secara otomatis menerbitkan nomor SPKL dan lembur berstatus
+              <strong>APPROVED</strong>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Status Pengajuan</h3>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DRAFT</strong></td>
+            <td>Pengajuan belum dikirimkan (sedang diisi).</td>
+          </tr>
+          <tr>
+            <td><strong>PENDING</strong></td>
+            <td>Pengajuan sedang dalam proses persetujuan berjenjang.</td>
+          </tr>
+          <tr>
+            <td><strong>APPROVED</strong></td>
+            <td>Semua tahap telah disetujui. Nomor SPKL diterbitkan.</td>
+          </tr>
+          <tr>
+            <td><strong>REJECTED</strong></td>
+            <td>Pengajuan ditolak oleh salah satu approver.</td>
+          </tr>
+          <tr>
+            <td><strong>REVISED</strong></td>
+            <td>Pengajuan perlu perbaikan sesuai catatan approver.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Penting</div>
+        Setiap perubahan status pengajuan akan dikirimkan notifikasi email kepada pegawai yang bersangkutan.
+        Pastikan alamat email perusahaan (<em>@plnipservices.co.id</em> atau <em>@plnindonesiapower.co.id</em>)
+        yang terdaftar di sistem masih aktif dan dapat diakses.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 4 — PANDUAN PEGAWAI
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 4</p>
+      <h1>PANDUAN PENGGUNA UMUM (PEGAWAI)</h1>
+      <hr class="thin" />
+
+      <h2>4.1 Login ke Sistem</h2>
+      <p>
+        Sistem ALUR menggunakan NIP (Nomor Induk Pegawai) sebagai nama pengguna dan kata sandi
+        yang ditetapkan oleh Super Admin.
+      </p>
+
+      <ul class="step-list">
+        <li><span class="step-num">1</span> Buka browser (Chrome, Firefox, Edge, atau Safari) dan masukkan alamat URL
+          sistem ALUR.</li>
+        <li><span class="step-num">2</span> Pada halaman login, masukkan <strong>NIP</strong> pada kolom <em>NIP / ID
+            Pegawai</em>.</li>
+        <li><span class="step-num">3</span> Masukkan <strong>Kata Sandi</strong> pada kolom yang tersedia.</li>
+        <li><span class="step-num">4</span> Klik tombol <strong>MASUK</strong>.</li>
+        <li><span class="step-num">5</span> Sistem akan mengarahkan ke halaman Dashboard sesuai peran akun.</li>
+      </ul>
+
+      <div class="warning-box avoid-break">
+        <div class="note-label">Perhatian</div>
+        <ul>
+          <li>Kata sandi awal adalah NIP Anda. Ubah kata sandi segera setelah login pertama melalui halaman
+            <strong>Profil</strong>.
+          </li>
+          <li>Apabila lupa kata sandi, hubungi Super Admin untuk melakukan reset password.</li>
+          <li>Jangan bagikan kata sandi kepada pihak lain. Setiap tindakan dalam sistem tercatat atas nama akun yang
+            login.</li>
+        </ul>
+      </div>
+
+      <h2>4.2 Dashboard</h2>
+      <p>
+        Halaman Dashboard merupakan halaman utama setelah login. Dashboard menampilkan:
+      </p>
+      <ul>
+        <li><strong>Sapaan dan Identitas Pengguna:</strong> Nama, jabatan, bidang, dan tipe kerja (Shift / Non-Shift).
+        </li>
+        <li><strong>Daftar Pengajuan Aktif:</strong> Semua pengajuan lembur/piket milik pengguna yang sedang dalam
+          proses, ditampilkan bersama status dan progres approval.</li>
+        <li><strong>Progress Bar Approval:</strong> Visualisasi tahap persetujuan yang telah dilalui dan tahap yang
+          sedang berjalan.</li>
+        <li><strong>Tombol Ajukan Lembur:</strong> Akses cepat untuk membuat pengajuan baru.</li>
+        <li><strong>Tombol Riwayat:</strong> Akses ke seluruh riwayat pengajuan.</li>
+      </ul>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Catatan</div>
+        Dashboard menampilkan pengajuan yang sedang berjalan secara <em>real-time</em>.
+        Jika status tidak diperbarui, gunakan tombol <strong>Refresh</strong> di browser.
+      </div>
+
+      <h2 class="page-break">4.3 Pengajuan Lembur / Piket</h2>
+      <p>
+        Fitur ini digunakan oleh pegawai untuk mencatat jam kerja lembur atau piket secara digital,
+        dengan verifikasi lokasi untuk memastikan pencatatan dilakukan dari lokasi yang valid.
+      </p>
+
+      <h3>4.3.1 Memilih Kategori</h3>
+      <p>
+        Pada halaman <em>Form Lembur Baru</em>, pilih salah satu kategori:
+      </p>
+      <ul>
+        <li><strong>LEMBUR:</strong> Untuk pekerjaan di luar jam kerja normal yang bukan merupakan tugas jaga/piket.
+        </li>
+        <li><strong>PIKET:</strong> Untuk tugas jaga/piket yang telah dijadwalkan.</li>
+      </ul>
+
+      <h3>4.3.2 Clock In</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span> Pastikan GPS/lokasi pada perangkat Anda telah diaktifkan dan izin lokasi
+          untuk browser sudah diberikan.</li>
+        <li><span class="step-num">2</span> Tunggu hingga sistem memverifikasi lokasi. Status verifikasi akan tampil di
+          banner atas halaman.</li>
+        <li><span class="step-num">3</span> Setelah status lokasi menunjukkan <strong>Di Dalam Area Kantor</strong>,
+          klik tombol <strong>CLOCK IN</strong>.</li>
+        <li><span class="step-num">4</span> Sistem akan mencatat waktu mulai secara otomatis sesuai waktu perangkat saat
+          tombol ditekan.</li>
+      </ul>
+
+      <h3>4.3.3 Clock Out</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span> Setelah pekerjaan selesai, buka kembali halaman Form Lembur (data Clock In
+          tersimpan sementara di perangkat).</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>CLOCK OUT</strong>.</li>
+        <li><span class="step-num">3</span> Sistem mencatat waktu selesai dan menghitung total durasi secara otomatis.
+        </li>
+      </ul>
+
+      <h3>4.3.4 Mengisi Data Pengajuan</h3>
+      <p>Setelah Clock In dan Clock Out, lengkapi formulir berikut:</p>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Kolom</th>
+            <th>Keterangan</th>
+            <th>Wajib</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Penugas</strong></td>
+            <td>Pilih nama Asisten Manager atau Manager yang memberikan penugasan lembur dari daftar yang tersedia.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td><strong>Dasar Pekerjaan</strong></td>
+            <td>Uraian singkat mengenai dasar/alasan dilakukannya lembur (contoh: "Gangguan unit #2 mengakibatkan
+              kebutuhan penanganan segera").</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td><strong>Uraian Pekerjaan</strong></td>
+            <td>Deskripsi rinci pekerjaan yang dilakukan selama lembur (contoh: "Penggantian bearing turbin, pengujian
+              sistem proteksi, dan normalisasi unit").</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td><strong>Dokumen Pendukung</strong></td>
+            <td>Upload foto atau dokumen bukti pekerjaan (opsional, namun disarankan untuk mempercepat proses
+              persetujuan).</td>
+            <td>Tidak</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>4.3.5 Mengirim Pengajuan</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span> Periksa kembali seluruh data yang telah diisi.</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>KIRIM PENGAJUAN</strong>.</li>
+        <li><span class="step-num">3</span> Sistem akan memproses dan mengirimkan notifikasi email ke approver pertama
+          secara otomatis.</li>
+        <li><span class="step-num">4</span> Pengguna akan diarahkan ke halaman detail pengajuan yang baru dibuat.</li>
+      </ul>
+
+      <div class="warning-box avoid-break">
+        <div class="note-label">Perhatian — Data Draft</div>
+        Data Clock In, Clock Out, dan isian formulir tersimpan sementara di perangkat (<em>local storage</em> browser).
+        Jika browser ditutup sebelum pengajuan dikirim, data dapat dipulihkan saat halaman form dibuka kembali
+        di perangkat yang sama. Gunakan tombol <strong>RESET</strong> untuk menghapus data draft jika ingin memulai dari
+        awal.
+      </div>
+
+      <h2>4.4 Verifikasi Lokasi</h2>
+      <p>
+        Sistem ALUR menggunakan verifikasi GPS untuk memastikan bahwa pengajuan dilakukan dari
+        area kantor yang telah ditetapkan. Berikut adalah status verifikasi lokasi beserta penanganannya:
+      </p>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Keterangan</th>
+            <th>Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><em>Memeriksa lokasi...</em></td>
+            <td>Sistem sedang memverifikasi posisi GPS pengguna.</td>
+            <td>Tunggu beberapa detik hingga proses selesai.</td>
+          </tr>
+          <tr>
+            <td><strong>Di Dalam Area Kantor</strong></td>
+            <td>Lokasi terdeteksi dalam radius area kantor yang valid.</td>
+            <td>Pengajuan dapat dilanjutkan.</td>
+          </tr>
+          <tr>
+            <td><strong>Di Luar Area Kantor</strong></td>
+            <td>Posisi GPS berada di luar radius yang ditetapkan.</td>
+            <td>Pengajuan tidak dapat dilakukan. Pastikan Anda berada di lokasi kerja.</td>
+          </tr>
+          <tr>
+            <td><strong>Izin Lokasi Diperlukan</strong></td>
+            <td>Pengguna belum memberikan izin akses lokasi ke browser.</td>
+            <td>Klik ikon gembok/lokasi di address bar browser, pilih "Izinkan Lokasi", lalu muat ulang halaman.</td>
+          </tr>
+          <tr>
+            <td><strong>GPS Tidak Tersedia</strong></td>
+            <td>Perangkat tidak mendukung atau GPS tidak berfungsi.</td>
+            <td>Gunakan perangkat lain yang mendukung GPS atau hubungi Admin.</td>
+          </tr>
+          <tr>
+            <td><strong>Lokasi Palsu Terdeteksi</strong></td>
+            <td>Sistem mendeteksi penggunaan aplikasi pemalsuan lokasi (GPS spoofing).</td>
+            <td>Nonaktifkan aplikasi mock/fake GPS. Penggunaan lokasi palsu merupakan pelanggaran.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warning-box">
+        <div class="note-label">Peringatan Keras</div>
+        Penggunaan aplikasi pemalsuan lokasi (<em>GPS spoofing</em>) untuk melewati verifikasi merupakan
+        pelanggaran integritas dan dapat dikenai sanksi sesuai peraturan perusahaan yang berlaku.
+      </div>
+
+      <h2>4.5 Riwayat Lembur</h2>
+      <p>
+        Halaman Riwayat menampilkan seluruh pengajuan lembur dan piket yang pernah dibuat oleh pengguna,
+        terurut dari yang terbaru. Informasi yang ditampilkan meliputi:
+      </p>
+      <ul>
+        <li>Kategori (Lembur / Piket) dan Dasar Pekerjaan.</li>
+        <li>Tanggal dan rentang waktu pengajuan.</li>
+        <li>Nomor SPKL (jika telah diterbitkan).</li>
+        <li>Status pengajuan saat ini.</li>
+        <li>Tahap persetujuan yang sedang berjalan (untuk status PENDING).</li>
+      </ul>
+      <p>
+        Klik salah satu item untuk membuka halaman <strong>Detail Lembur</strong>.
+      </p>
+
+      <h2>4.6 Detail Lembur</h2>
+      <p>
+        Halaman Detail menampilkan informasi lengkap satu pengajuan, meliputi:
+      </p>
+      <ul>
+        <li><strong>Informasi Pegawai:</strong> Nama, NIP, jabatan, dan bidang.</li>
+        <li><strong>Data Waktu:</strong> Tanggal, jam mulai, jam selesai, dan total durasi kerja.</li>
+        <li><strong>Dasar dan Uraian Pekerjaan:</strong> Ditampilkan secara terpisah dan jelas.</li>
+        <li><strong>Dokumen Bukti:</strong> Tampilan lampiran yang diunggah (jika ada).</li>
+        <li><strong>Rantai Persetujuan:</strong> Status setiap tahap approval beserta nama approver, waktu respons, dan
+          catatan (jika ada).</li>
+        <li><strong>Nomor SPKL:</strong> Tampil setelah pengajuan berstatus APPROVED.</li>
+      </ul>
+
+      <h2>4.7 Profil Pengguna</h2>
+      <p>
+        Halaman Profil memungkinkan pengguna memperbarui informasi kontak pribadi dan kata sandi.
+        Data yang dapat diubah adalah:
+      </p>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Kolom</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nomor Telepon / HP</strong></td>
+            <td>Nomor telepon pribadi untuk keperluan koordinasi.</td>
+          </tr>
+          <tr>
+            <td><strong>Email Pribadi</strong></td>
+            <td>Alamat email pribadi (selain email perusahaan). Digunakan sebagai saluran notifikasi alternatif.</td>
+          </tr>
+          <tr>
+            <td><strong>Kata Sandi Baru</strong></td>
+            <td>Ubah kata sandi login. Disarankan menggunakan kombinasi huruf, angka, dan karakter khusus dengan panjang
+              minimal 8 karakter.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Data yang tidak dapat diubah oleh pengguna (NIP, Nama, Jabatan, Bidang, Sub-Bidang, Tipe Kerja,
+        dan Email Perusahaan) hanya dapat diubah oleh Super Admin.
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Klik menu <strong>Profil</strong> di navigasi atas.</li>
+        <li><span class="step-num">2</span> Isi kolom yang ingin diperbarui (kolom yang dibiarkan kosong tidak akan
+          mengubah data yang ada).</li>
+        <li><span class="step-num">3</span> Klik tombol <strong>SIMPAN PERUBAHAN</strong>.</li>
+        <li><span class="step-num">4</span> Sistem menampilkan pesan konfirmasi keberhasilan.</li>
+      </ul>
+    </div>
+
+    <!-- ================================================================
+       BAB 5 — PANDUAN APPROVER
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 5</p>
+      <h1>PANDUAN APPROVER</h1>
+      <p><em>(Officer, Team Leader, Asisten Manager, Manager, Branch Manager)</em></p>
+      <hr class="thin" />
+
+      <h2>5.1 Halaman Antrian Approval</h2>
+      <p>
+        Setiap approver memiliki halaman <strong>Antrian Approval</strong> yang menampilkan daftar
+        pengajuan lembur yang sedang menunggu keputusan dari approver tersebut.
+        Halaman ini dapat diakses melalui menu navigasi atas <strong>"Approval"</strong>.
+      </p>
+      <p>
+        Informasi yang ditampilkan untuk setiap pengajuan dalam antrian:
+      </p>
+      <ul>
+        <li>Nama pegawai dan sub-bidang.</li>
+        <li>Tanggal dan rentang waktu lembur.</li>
+        <li>Deskripsi singkat pekerjaan.</li>
+        <li>Tahap approval saat ini dan peran approver.</li>
+      </ul>
+
+      <div class="note-box">
+        <div class="note-label">Catatan</div>
+        Antrian hanya menampilkan pengajuan yang memang merupakan giliran approver yang sedang login.
+        Pengajuan dari tahap lain tidak akan muncul meskipun approver memiliki akses ke sistem.
+      </div>
+
+      <h2>5.2 Proses Persetujuan melalui Email</h2>
+      <p>
+        Ketika tiba giliran seorang approver, sistem mengirimkan email notifikasi ke alamat email
+        perusahaan yang terdaftar. Email berisi:
+      </p>
+      <ul>
+        <li>Nama pegawai yang mengajukan lembur.</li>
+        <li>Detail waktu, dasar, dan uraian pekerjaan.</li>
+        <li>Tombol/tautan <strong>Setuju</strong>, <strong>Tolak</strong>, dan <strong>Minta Revisi</strong>.</li>
+      </ul>
+      <p>
+        Approver dapat langsung mengklik tautan di email tanpa perlu login ke sistem terlebih dahulu.
+        Tautan bersifat unik (<em>token-based</em>) dan hanya berlaku untuk satu keputusan.
+      </p>
+
+      <div class="warning-box avoid-break">
+        <div class="note-label">Perhatian — Keamanan Token Email</div>
+        <ul>
+          <li>Tautan persetujuan di email bersifat <strong>sekali pakai</strong>. Setelah digunakan, tautan tidak dapat
+            digunakan kembali.</li>
+          <li>Tautan memiliki batas waktu kedaluwarsa. Jika tautan telah kedaluwarsa, approver perlu login ke sistem dan
+            melakukan persetujuan melalui halaman Antrian Approval.</li>
+          <li>Jangan meneruskan email notifikasi ini ke pihak lain karena mengandung tautan persetujuan resmi.</li>
+        </ul>
+      </div>
+
+      <h2>5.3 Tindakan: Setuju, Tolak, Minta Revisi</h2>
+      <p>
+        Baik melalui email maupun melalui halaman sistem, approver memiliki tiga pilihan tindakan:
+      </p>
+
+      <h4>a. Setujui (<em>Approve</em>)</h4>
+      <p>
+        Pengajuan diteruskan ke tahap berikutnya secara otomatis. Jika ini adalah tahap terakhir,
+        pengajuan berstatus <strong>APPROVED</strong> dan nomor SPKL diterbitkan.
+      </p>
+
+      <h4>b. Tolak (<em>Reject</em>)</h4>
+      <p>
+        Pengajuan berstatus <strong>REJECTED</strong>. Proses berhenti dan pegawai menerima notifikasi
+        email berisi alasan penolakan. Pengajuan yang ditolak tidak dapat dilanjutkan kembali;
+        pegawai perlu membuat pengajuan baru jika diperlukan.
+      </p>
+
+      <h4>c. Minta Revisi (<em>Request Revision</em>)</h4>
+      <p>
+        Pengajuan berstatus <strong>REVISED</strong>. Pegawai menerima notifikasi beserta catatan
+        dari approver yang berisi hal-hal yang perlu diperbaiki. Pegawai dapat melakukan revisi
+        dan mengirim ulang pengajuan.
+      </p>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Tindakan</th>
+            <th>Status Pengajuan</th>
+            <th>Langkah Selanjutnya</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Setujui</strong></td>
+            <td>PENDING (lanjut ke tahap berikutnya) atau APPROVED</td>
+            <td>Sistem otomatis notifikasi approver berikutnya atau menerbitkan SPKL.</td>
+          </tr>
+          <tr>
+            <td><strong>Tolak</strong></td>
+            <td>REJECTED</td>
+            <td>Proses selesai. Pegawai diberitahu melalui email.</td>
+          </tr>
+          <tr>
+            <td><strong>Minta Revisi</strong></td>
+            <td>REVISED</td>
+            <td>Pegawai memperbaiki dan mengirim ulang pengajuan.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================================================================
+       BAB 6 — PANDUAN ADMIN
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 6</p>
+      <h1>PANDUAN ADMIN</h1>
+      <hr class="thin" />
+
+      <p>
+        Halaman Admin hanya dapat diakses oleh pengguna dengan peran <strong>ADMIN</strong>.
+        Halaman ini merupakan pusat pengelolaan data lembur seluruh pegawai dan bidang.
+      </p>
+
+      <h2>6.1 Akses Halaman Admin</h2>
+      <ul class="step-list">
+        <li><span class="step-num">1</span> Login ke sistem menggunakan akun dengan peran ADMIN.</li>
+        <li><span class="step-num">2</span> Setelah login, sistem otomatis mengarahkan ke <strong>Halaman
+            Admin</strong>.</li>
+        <li><span class="step-num">3</span> Halaman dapat diakses sewaktu-waktu melalui menu navigasi
+          <strong>"Admin"</strong>.
+        </li>
+      </ul>
+
+      <h2>6.2 Statistik Rekap</h2>
+      <p>
+        Bagian atas halaman Admin menampilkan kartu statistik ringkasan yang memperlihatkan gambaran
+        keseluruhan data sesuai filter yang sedang aktif:
+      </p>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Kartu Statistik</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Total Disetujui</strong></td>
+            <td>Jumlah pengajuan dengan status APPROVED.</td>
+          </tr>
+          <tr>
+            <td><strong>Menunggu Approval</strong></td>
+            <td>Jumlah pengajuan dengan status PENDING.</td>
+          </tr>
+          <tr>
+            <td><strong>Ditolak</strong></td>
+            <td>Jumlah pengajuan dengan status REJECTED.</td>
+          </tr>
+          <tr>
+            <td><strong>Jumlah Pegawai</strong></td>
+            <td>Jumlah pegawai unik yang memiliki pengajuan dalam data yang ditampilkan.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>6.3 Filter &amp; Pencarian Data</h2>
+      <p>
+        Admin dapat memfilter data menggunakan kombinasi parameter berikut:
+      </p>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Filter</th>
+            <th>Opsi</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bulan</strong></td>
+            <td>Pilih bulan/tahun</td>
+            <td>Menampilkan pengajuan berdasarkan bulan Tanggal Mulai. Default: bulan berjalan.</td>
+          </tr>
+          <tr>
+            <td><strong>Bidang</strong></td>
+            <td>Operasi, SDM &amp; Keuangan, Pemeliharaan, Engineering, Semua Bidang</td>
+            <td>Memfilter pengajuan berdasarkan bidang pegawai.</td>
+          </tr>
+          <tr>
+            <td><strong>Status</strong></td>
+            <td>Semua, Disetujui, Menunggu, Ditolak, Perlu Revisi</td>
+            <td>Memfilter berdasarkan status pengajuan.</td>
+          </tr>
+          <tr>
+            <td><strong>Kategori</strong></td>
+            <td>Semua, Lembur, Piket</td>
+            <td>Memfilter berdasarkan jenis pengajuan.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Atur kombinasi filter sesuai kebutuhan.</li>
+        <li><span class="step-num">2</span> Data pada tabel dan statistik akan diperbarui secara otomatis.</li>
+        <li><span class="step-num">3</span> Klik tombol <strong>RESET FILTER</strong> untuk kembali ke tampilan default
+          (bulan berjalan, semua bidang).</li>
+      </ul>
+
+      <h2>6.4 Persetujuan Akhir oleh Admin</h2>
+      <p>
+        Admin berperan sebagai tahap persetujuan akhir dalam rantai approval. Pengajuan yang telah
+        melewati semua tahap sebelumnya akan muncul di antrian approval Admin dengan indikator
+        <em>"Giliran Anda"</em>.
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Identifikasi pengajuan yang menunggu persetujuan Admin (ditandai dengan
+          tombol <strong>SETUJUI</strong> berwarna pada kartu).</li>
+        <li><span class="step-num">2</span> Tinjau detail pengajuan dengan mengklik kartu untuk membuka halaman detail.
+        </li>
+        <li><span class="step-num">3</span> Kembali ke halaman Admin dan klik tombol <strong>SETUJUI</strong> pada
+          pengajuan yang bersangkutan.</li>
+        <li><span class="step-num">4</span> Sistem secara otomatis menerbitkan nomor SPKL dan status berubah menjadi
+          APPROVED.</li>
+        <li><span class="step-num">5</span> Email notifikasi dikirimkan kepada pegawai yang bersangkutan.</li>
+      </ul>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Nomor SPKL</div>
+        Nomor SPKL diterbitkan otomatis oleh sistem menggunakan format standar yang mencakup
+        kode bidang, bulan, tahun, dan nomor urut. Nomor ini bersifat unik dan tidak dapat diubah
+        setelah diterbitkan.
+      </div>
+
+      <h2>6.5 Export Data Excel (XLSX)</h2>
+      <p>
+        Admin dapat mengunduh rekap data dalam format Microsoft Excel untuk keperluan laporan,
+        arsip, atau analisis lebih lanjut.
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Atur filter data sesuai kebutuhan (bulan, bidang, status, kategori).</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>EXPORT XLSX</strong> di bagian atas halaman.</li>
+        <li><span class="step-num">3</span> File Excel akan otomatis diunduh ke komputer dengan nama file sesuai filter
+          yang aktif.</li>
+      </ul>
+
+      <p>File Excel yang dihasilkan memuat kolom-kolom berikut:</p>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Kolom</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>No</td>
+            <td>Nomor urut baris.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Kategori</td>
+            <td>LEMBUR atau PIKET.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Nomor SPKL</td>
+            <td>Nomor surat resmi (jika telah diterbitkan).</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Nama</td>
+            <td>Nama lengkap pegawai.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>NIP</td>
+            <td>Nomor Induk Pegawai.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Jabatan</td>
+            <td>Jenjang jabatan pegawai.</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>Bidang</td>
+            <td>Bidang kerja pegawai.</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>Sub Bidang</td>
+            <td>Sub-bidang kerja pegawai.</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>Tanggal Mulai</td>
+            <td>Tanggal mulai lembur.</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>Tanggal Selesai</td>
+            <td>Tanggal selesai lembur.</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td>Jam Mulai</td>
+            <td>Jam mulai (Clock In).</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td>Jam Selesai</td>
+            <td>Jam selesai (Clock Out).</td>
+          </tr>
+          <tr>
+            <td>13</td>
+            <td>Durasi</td>
+            <td>Total durasi kerja (jam dan menit).</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td>Dasar Pekerjaan</td>
+            <td>Dasar/alasan lembur.</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td>Uraian Pekerjaan</td>
+            <td>Deskripsi rinci pekerjaan yang dilakukan.</td>
+          </tr>
+          <tr>
+            <td>16</td>
+            <td>Penugas</td>
+            <td>Nama pejabat yang menugaskan.</td>
+          </tr>
+          <tr>
+            <td>17</td>
+            <td>Status</td>
+            <td>Status akhir pengajuan.</td>
+          </tr>
+          <tr>
+            <td>18</td>
+            <td>Disetujui Oleh</td>
+            <td>Nama approver terakhir yang menyetujui.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>6.6 Export SPKL PDF per Pengajuan</h2>
+      <p>
+        Admin dapat mencetak/mengunduh Surat Perintah Kerja Lembur (SPKL) dalam format PDF
+        untuk setiap pengajuan yang telah berstatus <strong>APPROVED</strong>.
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Temukan pengajuan dengan status APPROVED pada tabel rekap.</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>unduh PDF</strong> (ikon dokumen) pada baris pengajuan
+          tersebut.</li>
+        <li><span class="step-num">3</span> File PDF dengan kop surat resmi PLN Indonesia Power Services akan otomatis
+          diunduh.</li>
+      </ul>
+
+      <div class="note-box">
+        <div class="note-label">Catatan</div>
+        SPKL PDF hanya dapat diterbitkan untuk pengajuan dengan status APPROVED.
+        Pengajuan dengan status lain tidak memiliki tombol unduh PDF.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 7 — PANDUAN SUPER ADMIN
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 7</p>
+      <h1>PANDUAN SUPER ADMIN</h1>
+      <hr class="thin" />
+
+      <p>
+        Super Admin memiliki akses eksklusif ke halaman <strong>Manajemen Pengguna</strong>.
+        Fitur ini digunakan untuk mengelola seluruh akun pengguna dalam sistem ALUR.
+      </p>
+
+      <h2>7.1 Manajemen Pengguna</h2>
+      <p>
+        Halaman Manajemen Pengguna menampilkan tabel seluruh pengguna yang terdaftar dalam sistem.
+        Tersedia fitur pencarian dan filter untuk memudahkan pengelolaan:
+      </p>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Filter</th>
+            <th>Opsi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Pencarian Nama/NIP</strong></td>
+            <td>Ketik nama atau NIP pegawai untuk mencari secara cepat.</td>
+          </tr>
+          <tr>
+            <td><strong>Filter Peran</strong></td>
+            <td>Semua Peran, Pegawai, Officer, TL, Asman, Manager, Branch Manager, Admin, Super Admin.</td>
+          </tr>
+          <tr>
+            <td><strong>Filter Bidang</strong></td>
+            <td>Semua Bidang, Operasi, SDM &amp; Keuangan, Pemeliharaan, Engineering.</td>
+          </tr>
+          <tr>
+            <td><strong>Filter Sub-Bidang</strong></td>
+            <td>Bergantung pada bidang yang dipilih.</td>
+          </tr>
+          <tr>
+            <td><strong>Filter Tipe Kerja</strong></td>
+            <td>Semua, Shift, Non-Shift.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Setiap baris pengguna menampilkan: NIP, Nama, Jabatan, Bidang, Sub-Bidang, Peran,
+        Tipe Kerja (Shift/Non-Shift), Email Perusahaan, Nomor Telepon, dan jumlah pengajuan lembur
+        yang pernah dibuat. Tersedia tombol <strong>Edit</strong> dan <strong>Reset Password</strong>
+        pada setiap baris.
+      </p>
+
+      <h2>7.2 Tambah Pengguna Baru</h2>
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Klik tombol <strong>TAMBAH PENGGUNA</strong> di bagian atas halaman
+          Manajemen Pengguna.</li>
+        <li><span class="step-num">2</span> Isi formulir tambah pengguna dengan data berikut:</li>
+      </ul>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Kolom</th>
+            <th>Keterangan</th>
+            <th>Wajib</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>NIP</td>
+            <td>Nomor Induk Pegawai. Harus unik di seluruh sistem.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Nama Lengkap</td>
+            <td>Nama lengkap pegawai sesuai data resmi perusahaan.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Jenjang Jabatan</td>
+            <td>Jabatan resmi pegawai (contoh: Pelaksana K3, Operator BOP).</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Bidang</td>
+            <td>Pilih bidang kerja (Operasi, SDM &amp; Keuangan, Pemeliharaan, Engineering).</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Sub-Bidang</td>
+            <td>Pilih sub-bidang sesuai bidang yang dipilih.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Peran</td>
+            <td>Tetapkan peran akses pengguna dalam sistem.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Tipe Kerja</td>
+            <td>SHIFT atau NON-SHIFT. Menentukan rantai approver yang berlaku.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Grup Shift (TL Group)</td>
+            <td>Wajib diisi jika Tipe Kerja adalah SHIFT. Pilih: A, B, C, atau D.</td>
+            <td>Kondisional</td>
+          </tr>
+          <tr>
+            <td>Email Perusahaan</td>
+            <td>Alamat email resmi perusahaan. Digunakan untuk notifikasi approval.</td>
+            <td>Ya</td>
+          </tr>
+          <tr>
+            <td>Email Pribadi</td>
+            <td>Alamat email pribadi (opsional).</td>
+            <td>Tidak</td>
+          </tr>
+          <tr>
+            <td>Nomor Telepon</td>
+            <td>Nomor HP aktif (opsional).</td>
+            <td>Tidak</td>
+          </tr>
+          <tr>
+            <td>Kata Sandi Awal</td>
+            <td>Kata sandi pertama yang akan digunakan untuk login. Umumnya diset sama dengan NIP.</td>
+            <td>Ya</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">3</span> Periksa kembali seluruh data yang diisi.</li>
+        <li><span class="step-num">4</span> Klik tombol <strong>SIMPAN</strong> untuk menyimpan pengguna baru ke sistem.
+        </li>
+        <li><span class="step-num">5</span> Pengguna baru akan langsung dapat login menggunakan NIP dan kata sandi yang
+          ditetapkan.</li>
+      </ul>
+
+      <h2>7.3 Edit Data Pengguna</h2>
+      <p>
+        Super Admin dapat mengubah data pengguna yang sudah ada untuk keperluan koreksi atau
+        pembaruan data (misalnya: perubahan jabatan, mutasi bidang, perubahan tipe kerja,
+        atau perubahan peran).
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Temukan pengguna yang akan diedit melalui fitur pencarian atau filter.</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>Edit</strong> (ikon pensil) pada baris pengguna.</li>
+        <li><span class="step-num">3</span> Panel edit akan terbuka menampilkan seluruh data pengguna yang dapat diubah.
+        </li>
+        <li><span class="step-num">4</span> Ubah data yang diperlukan.</li>
+        <li><span class="step-num">5</span> Klik <strong>SIMPAN PERUBAHAN</strong> untuk menyimpan.</li>
+        <li><span class="step-num">6</span> Sistem menampilkan konfirmasi perubahan berhasil disimpan.</li>
+      </ul>
+
+      <div class="warning-box avoid-break">
+        <div class="note-label">Perhatian — Dampak Perubahan Peran &amp; Bidang</div>
+        <ul>
+          <li>Perubahan <strong>Peran</strong> akan langsung mempengaruhi hak akses pengguna. Pengguna yang sedang login
+            akan mengalami perubahan setelah sesi berikutnya.</li>
+          <li>Perubahan <strong>Bidang</strong> atau <strong>Sub-Bidang</strong> akan mempengaruhi rantai approver yang
+            berlaku untuk pengajuan lembur baru.</li>
+          <li>Perubahan <strong>Tipe Kerja</strong> (SHIFT ke NON-SHIFT atau sebaliknya) berdampak pada alur approval
+            yang akan digunakan.</li>
+          <li>Pengajuan yang sedang dalam proses <em>tidak</em> terpengaruh oleh perubahan data ini.</li>
+        </ul>
+      </div>
+
+      <h2>7.4 Reset Password Pengguna</h2>
+      <p>
+        Jika pengguna lupa kata sandi dan tidak dapat login, Super Admin dapat melakukan reset
+        password tanpa perlu mengetahui kata sandi lama.
+      </p>
+
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Temukan pengguna yang memerlukan reset password.</li>
+        <li><span class="step-num">2</span> Klik tombol <strong>Reset Password</strong> (ikon kunci) pada baris
+          pengguna.</li>
+        <li><span class="step-num">3</span> Panel reset password akan terbuka.</li>
+        <li><span class="step-num">4</span> Masukkan kata sandi baru pada kolom yang tersedia.</li>
+        <li><span class="step-num">5</span> Klik <strong>SIMPAN PASSWORD BARU</strong> untuk menerapkan perubahan.</li>
+        <li><span class="step-num">6</span> Informasikan kata sandi baru kepada pengguna yang bersangkutan melalui
+          saluran komunikasi yang aman.</li>
+      </ul>
+
+      <div class="note-box">
+        <div class="note-label">Rekomendasi Keamanan</div>
+        Setelah melakukan reset password, instruksikan pengguna untuk segera mengubah kata sandinya
+        sendiri melalui halaman Profil. Kata sandi sementara tidak boleh digunakan dalam jangka panjang.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 8 — NOMOR SPKL
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 8</p>
+      <h1>NOMOR SPKL &amp; DOKUMEN RESMI</h1>
+      <hr class="thin" />
+
+      <h2>8.1 Penerbitan Nomor SPKL</h2>
+      <p>
+        Surat Perintah Kerja Lembur (SPKL) diterbitkan secara otomatis oleh sistem setelah
+        seluruh tahap persetujuan berhasil diselesaikan dan Admin memberikan persetujuan akhir.
+      </p>
+      <p>
+        Nomor SPKL bersifat:
+      </p>
+      <ul>
+        <li><strong>Unik:</strong> Setiap pengajuan yang disetujui memiliki nomor SPKL yang berbeda.</li>
+        <li><strong>Permanen:</strong> Nomor tidak dapat diubah setelah diterbitkan.</li>
+        <li><strong>Terstruktur:</strong> Mengikuti format penomoran resmi yang mencakup kode bidang, tanggal, dan nomor
+          urut.</li>
+      </ul>
+
+      <h2>8.2 Dokumen SPKL PDF</h2>
+      <p>
+        Dokumen SPKL dalam format PDF dapat diunduh oleh Admin melalui halaman rekap.
+        Dokumen SPKL memuat:
+      </p>
+      <ul>
+        <li>Kop surat resmi PT PLN Indonesia Power Services.</li>
+        <li>Nomor dan tanggal SPKL.</li>
+        <li>Data pegawai yang melakukan lembur.</li>
+        <li>Detail waktu lembur (tanggal, jam mulai, jam selesai, durasi).</li>
+        <li>Dasar dan uraian pekerjaan.</li>
+        <li>Rantai persetujuan lengkap beserta tanda tangan digital.</li>
+        <li>QR Code untuk verifikasi keaslian dokumen.</li>
+        <li>Lampiran bukti pekerjaan (jika ada).</li>
+      </ul>
+
+      <div class="note-box">
+        <div class="note-label">Verifikasi Dokumen</div>
+        Setiap dokumen SPKL yang dicetak dilengkapi dengan QR Code yang dapat dipindai
+        untuk memverifikasi keaslian dokumen secara digital. Dokumen yang tidak memiliki
+        QR Code yang valid harus dianggap tidak sah.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 9 — FAQ
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 9</p>
+      <h1>PERTANYAAN UMUM (FAQ)</h1>
+      <hr class="thin" />
+
+      <h3>1. Mengapa saya tidak bisa melakukan Clock In padahal GPS sudah aktif?</h3>
+      <p>
+        Pastikan browser Anda memiliki izin akses lokasi. Klik ikon gembok atau lokasi di address bar
+        browser, pilih "Izinkan", lalu muat ulang halaman. Jika masih tidak berhasil, coba gunakan
+        browser berbeda atau perangkat lain.
+      </p>
+
+      <h3>2. Saya tidak menerima email notifikasi approval. Apa yang harus dilakukan?</h3>
+      <p>
+        Periksa folder Spam/Junk pada email perusahaan Anda. Jika email tidak ada di folder Spam,
+        hubungi Super Admin untuk memastikan alamat email yang terdaftar di sistem sudah benar
+        dan aktif.
+      </p>
+
+      <h3>3. Tautan approval di email sudah tidak bisa digunakan.</h3>
+      <p>
+        Tautan persetujuan memiliki masa berlaku terbatas. Jika sudah kedaluwarsa, login ke sistem
+        menggunakan akun Anda dan lakukan persetujuan melalui halaman Antrian Approval
+        (<em>menu "Approval"</em> di navigasi atas).
+      </p>
+
+      <h3>4. Saya sudah Clock In tetapi lupa Clock Out dan menutup browser.</h3>
+      <p>
+        Data Clock In tersimpan di <em>local storage</em> browser yang sama. Buka kembali halaman
+        Form Lembur di browser dan perangkat yang sama, data Clock In akan muncul kembali secara
+        otomatis. Lakukan Clock Out dan lengkapi pengajuan.
+      </p>
+
+      <h3>5. Apakah pengajuan yang ditolak dapat diajukan ulang?</h3>
+      <p>
+        Ya. Pengajuan yang ditolak tidak dapat dilanjutkan, tetapi pegawai dapat membuat pengajuan
+        baru dengan data yang telah diperbaiki sesuai alasan penolakan dari approver.
+      </p>
+
+      <h3>6. Berapa lama proses approval berlangsung?</h3>
+      <p>
+        Durasi proses approval bergantung pada respons setiap approver. Sistem akan mengirimkan
+        email notifikasi kepada setiap approver ketika tiba gilirannya. Tidak ada batas waktu
+        sistem yang otomatis; namun secara prosedural, setiap tahap diharapkan diselesaikan
+        dalam 1×24 jam kerja.
+      </p>
+
+      <h3>7. Mengapa kolom Penugas tidak menampilkan nama atasan saya?</h3>
+      <p>
+        Daftar penugas diisi oleh sistem berdasarkan Asisten Manager dan Manager yang terdaftar
+        di bidang yang sama dengan pegawai. Jika nama atasan tidak muncul, kemungkinan peran
+        atau bidang atasan tersebut belum disetel dengan benar. Hubungi Super Admin.
+      </p>
+
+      <h3>8. Saya tidak bisa mengakses halaman Admin / Super Admin.</h3>
+      <p>
+        Akses halaman tersebut memerlukan peran yang sesuai. Jika Anda seharusnya memiliki akses
+        tersebut, hubungi Super Admin untuk memeriksa dan memperbaiki peran akun Anda.
+      </p>
+
+      <h3>9. Bagaimana cara melihat SPKL saya yang sudah disetujui?</h3>
+      <p>
+        Buka halaman Riwayat Lembur, klik pengajuan yang berstatus APPROVED, dan nomor SPKL
+        akan tertera di halaman Detail. Untuk mengunduh dokumen SPKL dalam format PDF,
+        hubungi Admin yang memiliki akses unduh dokumen.
+      </p>
+
+      <h3>10. Data di export Excel berbeda dari yang ditampilkan di layar Admin.</h3>
+      <p>
+        Pastikan filter yang digunakan saat export sama dengan filter yang aktif di layar.
+        Export Excel akan mengikuti semua parameter filter yang sedang aktif (bulan, bidang,
+        status, kategori).
+      </p>
+    </div>
+
+    <!-- ================================================================
+       BAB 8 — PERSETUJUAN VIA EMAIL & VALIDASI DOKUMEN
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 8</p>
+      <h1>PERSETUJUAN VIA EMAIL &amp; VALIDASI DOKUMEN</h1>
+      <hr class="thin" />
+
+      <h2>8.1 Halaman Persetujuan Langsung via Email</h2>
+      <p>
+        Sistem ALUR memungkinkan approver memberikan keputusan tanpa harus login ke sistem,
+        cukup melalui tautan unik yang dikirimkan via email. Halaman ini dirancang agar proses
+        persetujuan dapat dilakukan dengan cepat dari perangkat apa pun.
+      </p>
+
+      <h3>Cara Menggunakan Tautan Email</h3>
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Buka email perusahaan Anda. Cari email notifikasi dari sistem ALUR dengan
+          subjek terkait pengajuan lembur.</li>
+        <li><span class="step-num">2</span> Di dalam email, terdapat tiga tombol/tautan: <strong>Setujui</strong>,
+          <strong>Minta Revisi</strong>, dan <strong>Tolak</strong>. Klik sesuai keputusan Anda.
+        </li>
+        <li><span class="step-num">3</span> Browser akan membuka halaman konfirmasi yang menampilkan detail lengkap
+          pengajuan.</li>
+        <li><span class="step-num">4</span> Periksa detail pengajuan: nama pegawai, waktu lembur, dasar dan uraian
+          pekerjaan, serta bukti (jika ada).</li>
+        <li><span class="step-num">5</span> Pada panel tindakan, pilih keputusan Anda (Setujui / Minta Revisi / Tolak).
+        </li>
+        <li><span class="step-num">6</span> Untuk tindakan <strong>Minta Revisi</strong> dan <strong>Tolak</strong>, isi
+          kolom catatan (wajib).</li>
+        <li><span class="step-num">7</span> Klik tombol <strong>KONFIRMASI</strong> untuk mengirim keputusan.</li>
+        <li><span class="step-num">8</span> Halaman menampilkan konfirmasi keberhasilan dan sistem otomatis meneruskan
+          ke tahap berikutnya.</li>
+      </ul>
+
+      <p>Informasi yang ditampilkan di halaman persetujuan email:</p>
+      <ul>
+        <li>Identitas pegawai yang mengajukan (nama, NIP, jabatan, sub-bidang).</li>
+        <li>Pernyataan penugas (siapa yang menugaskan).</li>
+        <li>Jam mulai, jam selesai, dan total durasi kerja.</li>
+        <li>Dasar dan uraian pekerjaan secara lengkap.</li>
+        <li>Foto/dokumen bukti pekerjaan (jika ada).</li>
+        <li>Visualisasi alur persetujuan: tahap selesai, tahap aktif, dan tahap berikutnya.</li>
+      </ul>
+
+      <div class="warning-box avoid-break">
+        <div class="note-label">Keamanan Tautan</div>
+        <ul>
+          <li>Tautan persetujuan bersifat <strong>sekali pakai</strong>. Setelah satu keputusan diberikan, tautan tidak
+            dapat digunakan kembali.</li>
+          <li>Tautan memiliki masa berlaku. Jika tautan kedaluwarsa, approver harus login ke sistem dan menggunakan
+            halaman Antrian Approval.</li>
+          <li>Jangan meneruskan email ini ke pihak lain. Tautan membawa otoritas persetujuan resmi.</li>
+        </ul>
+      </div>
+
+      <h2>8.2 Halaman Validasi Dokumen (QR Code)</h2>
+      <p>
+        Setiap dokumen SPKL yang dicetak memuat sebuah <em>QR Code</em> di bagian bawah dokumen.
+        QR Code ini mengarahkan ke halaman validasi resmi yang membuktikan keaslian dan keabsahan dokumen.
+      </p>
+
+      <h3>Cara Memverifikasi Keaslian SPKL</h3>
+      <ul class="step-list avoid-break">
+        <li><span class="step-num">1</span> Pindai QR Code pada dokumen SPKL cetak menggunakan kamera ponsel atau
+          aplikasi pemindai QR.</li>
+        <li><span class="step-num">2</span> Browser akan membuka halaman validasi resmi (tidak memerlukan login).</li>
+        <li><span class="step-num">3</span> Periksa status validasi yang ditampilkan.</li>
+      </ul>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Status Validasi</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TERVALIDASI &amp; SAH</strong></td>
+            <td>Dokumen asli dan seluruh tahap persetujuan telah diselesaikan. Dokumen resmi berlaku.</td>
+          </tr>
+          <tr>
+            <td><strong>DALAM PROSES</strong></td>
+            <td>Pengajuan masih dalam tahap persetujuan. Dokumen belum berstatus final.</td>
+          </tr>
+          <tr>
+            <td><strong>DITOLAK</strong></td>
+            <td>Pengajuan tidak disetujui. Dokumen ini tidak sah untuk digunakan sebagai bukti resmi.</td>
+          </tr>
+          <tr>
+            <td><strong>Dokumen Tidak Valid</strong></td>
+            <td>ID dokumen tidak ditemukan di sistem. Dokumen kemungkinan dipalsukan.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Halaman validasi juga menampilkan:
+      </p>
+      <ul>
+        <li>Nomor SPKL (referensi resmi).</li>
+        <li>Data pegawai: nama, NIP, jabatan, bidang/sub-bidang, tipe kerja.</li>
+        <li>Waktu mulai dan selesai lembur.</li>
+        <li>Log persetujuan digital: nama pejabat pengesah, peran, status, dan waktu respons.</li>
+      </ul>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Penting</div>
+        Dokumen SPKL yang valid harus menampilkan status <strong>"TERVALIDASI &amp; SAH"</strong> saat QR Code-nya
+        dipindai.
+        Dokumen SPKL yang tidak dapat diverifikasi atau menampilkan status selain itu tidak boleh diterima
+        sebagai dokumen resmi.
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 9 — RANTAI PERSETUJUAN PER SUB-BIDANG
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 9</p>
+      <h1>RANTAI PERSETUJUAN PER SUB-BIDANG</h1>
+      <hr class="thin" />
+
+      <p>
+        Setiap sub-bidang memiliki rantai persetujuan (approval chain) yang berbeda sesuai
+        struktur organisasi. Tabel berikut merinci urutan approver untuk setiap sub-bidang.
+      </p>
+
+      <h2>9.1 Bidang Operasi</h2>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Sub-Bidang</th>
+            <th>Tahap 1</th>
+            <th>Tahap 2</th>
+            <th>Tahap 3</th>
+            <th>Tahap 4</th>
+            <th>Tahap 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Kepmo</strong></td>
+            <td>Officer Kepmo</td>
+            <td>Asman K3L</td>
+            <td>Manager Operasi</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Lingkungan</strong></td>
+            <td>Officer Lingkungan</td>
+            <td>Asman K3L</td>
+            <td>Manager Operasi</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>K3</strong></td>
+            <td>Officer K3</td>
+            <td>Asman K3L</td>
+            <td>Manager Operasi</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Operator Shift</strong></td>
+            <td>TL Shift</td>
+            <td>Asman Operasi</td>
+            <td>Manager Operasi</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Operator Niaga</strong></td>
+            <td>Asman Niaga</td>
+            <td>Manager Operasi</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>9.2 Bidang SDM &amp; Keuangan</h2>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Sub-Bidang</th>
+            <th>Tahap 1</th>
+            <th>Tahap 2</th>
+            <th>Tahap 3</th>
+            <th>Tahap 4</th>
+            <th>Tahap 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SDM</strong></td>
+            <td>Officer SDM</td>
+            <td>Asman SDM</td>
+            <td>Manager SDM &amp; Keu</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Umum</strong></td>
+            <td>Officer Umum</td>
+            <td>Asman Umum</td>
+            <td>Manager SDM &amp; Keu</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Keuangan</strong></td>
+            <td>Asman Keu &amp; Akuntansi</td>
+            <td>Manager SDM &amp; Keu</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>PBJ</strong></td>
+            <td>Asman PBJ</td>
+            <td>Manager SDM &amp; Keu</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>9.3 Bidang Pemeliharaan</h2>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Sub-Bidang</th>
+            <th>Tahap 1</th>
+            <th>Tahap 2</th>
+            <th>Tahap 3</th>
+            <th>Tahap 4</th>
+            <th>Tahap 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Listrik</strong></td>
+            <td>TL Listrik</td>
+            <td>Asman Listrik</td>
+            <td>Manager Pemeliharaan</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>I&amp;C</strong></td>
+            <td>TL I&amp;C</td>
+            <td>Asman I&amp;C</td>
+            <td>Manager Pemeliharaan</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Mekanik</strong></td>
+            <td>TL Mekanik</td>
+            <td>Asman Mekanik</td>
+            <td>Manager Pemeliharaan</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>BOP</strong></td>
+            <td>TL BOP</td>
+            <td>Asman BOP</td>
+            <td>Manager Pemeliharaan</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>9.4 Bidang Engineering</h2>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Sub-Bidang</th>
+            <th>Tahap 1</th>
+            <th>Tahap 2</th>
+            <th>Tahap 3</th>
+            <th>Tahap 4</th>
+            <th>Tahap 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PDM</strong></td>
+            <td>TL PDM</td>
+            <td>Asman PDM</td>
+            <td>Manager Engineering</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Admin &amp; Sekretaris</strong></td>
+            <td>Officer Kinerja</td>
+            <td>Asman EKSIS</td>
+            <td>Manager Engineering</td>
+            <td>Branch Manager</td>
+            <td>Admin</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Kasus Khusus — Pengajuan oleh Admin</div>
+        Apabila pengguna dengan peran <strong>ADMIN</strong> mengajukan lembur, pengajuan tersebut
+        melewati seluruh rantai persetujuan reguler dan langsung masuk ke antrian
+        <strong>Branch Manager IPS</strong> sebagai satu-satunya tahap persetujuan.
+      </div>
+
+      <div class="note-box avoid-break">
+        <div class="note-label">Catatan Grup Shift</div>
+        Untuk sub-bidang <strong>Operator Shift</strong>, pengajuan akan diteruskan ke Team Leader (TL)
+        dari grup shift yang sama dengan pegawai (Grup A, B, C, atau D). Pastikan data Grup Shift
+        pegawai sudah benar di sistem (dikelola oleh Super Admin).
+      </div>
+    </div>
+
+    <!-- ================================================================
+       BAB 10 — FAQ (renumbered from 9)
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 10</p>
+      <h1>PERTANYAAN UMUM (FAQ)</h1>
+      <hr class="thin" />
+
+      <h3>1. Mengapa saya tidak bisa melakukan Clock In padahal GPS sudah aktif?</h3>
+      <p>
+        Pastikan browser Anda memiliki izin akses lokasi. Klik ikon gembok atau lokasi di address bar
+        browser, pilih "Izinkan", lalu muat ulang halaman. Jika masih tidak berhasil, coba gunakan
+        browser berbeda atau perangkat lain.
+      </p>
+
+      <h3>2. Saya tidak menerima email notifikasi approval. Apa yang harus dilakukan?</h3>
+      <p>
+        Periksa folder Spam/Junk pada email perusahaan Anda. Jika email tidak ada di folder Spam,
+        hubungi Super Admin untuk memastikan alamat email yang terdaftar di sistem sudah benar
+        dan aktif.
+      </p>
+
+      <h3>3. Tautan approval di email sudah tidak bisa digunakan.</h3>
+      <p>
+        Tautan persetujuan memiliki masa berlaku terbatas. Jika sudah kedaluwarsa, login ke sistem
+        menggunakan akun Anda dan lakukan persetujuan melalui halaman Antrian Approval
+        (<em>menu "Approval"</em> di navigasi atas).
+      </p>
+
+      <h3>4. Saya sudah Clock In tetapi lupa Clock Out dan menutup browser.</h3>
+      <p>
+        Data Clock In tersimpan di <em>local storage</em> browser yang sama. Buka kembali halaman
+        Form Lembur di browser dan perangkat yang sama, data Clock In akan muncul kembali secara
+        otomatis. Lakukan Clock Out dan lengkapi pengajuan.
+      </p>
+
+      <h3>5. Apakah pengajuan yang ditolak dapat diajukan ulang?</h3>
+      <p>
+        Ya. Pengajuan yang ditolak tidak dapat dilanjutkan, tetapi pegawai dapat membuat pengajuan
+        baru dengan data yang telah diperbaiki sesuai alasan penolakan dari approver.
+      </p>
+
+      <h3>6. Berapa lama proses approval berlangsung?</h3>
+      <p>
+        Durasi proses approval bergantung pada respons setiap approver. Sistem akan mengirimkan
+        email notifikasi kepada setiap approver ketika tiba gilirannya. Tidak ada batas waktu
+        sistem yang otomatis; namun secara prosedural, setiap tahap diharapkan diselesaikan
+        dalam 1&times;24 jam kerja.
+      </p>
+
+      <h3>7. Mengapa kolom Penugas tidak menampilkan nama atasan saya?</h3>
+      <p>
+        Daftar penugas diisi oleh sistem berdasarkan Asisten Manager dan Manager yang terdaftar
+        di bidang yang sama dengan pegawai. Jika nama atasan tidak muncul, kemungkinan peran
+        atau bidang atasan tersebut belum disetel dengan benar. Hubungi Super Admin.
+      </p>
+
+      <h3>8. Saya tidak bisa mengakses halaman Admin / Super Admin.</h3>
+      <p>
+        Akses halaman tersebut memerlukan peran yang sesuai. Jika Anda seharusnya memiliki akses
+        tersebut, hubungi Super Admin untuk memeriksa dan memperbaiki peran akun Anda.
+      </p>
+
+      <h3>9. Bagaimana cara melihat SPKL saya yang sudah disetujui?</h3>
+      <p>
+        Buka halaman Riwayat Lembur, klik pengajuan yang berstatus APPROVED, dan nomor SPKL
+        akan tertera di halaman Detail. Untuk mengunduh dokumen SPKL dalam format PDF,
+        hubungi Admin yang memiliki akses unduh dokumen.
+      </p>
+
+      <h3>10. Data di export Excel berbeda dari yang ditampilkan di layar Admin.</h3>
+      <p>
+        Pastikan filter yang digunakan saat export sama dengan filter yang aktif di layar.
+        Export Excel akan mengikuti semua parameter filter yang sedang aktif (bulan, bidang,
+        status, kategori).
+      </p>
+
+      <h3>11. Bagaimana cara memverifikasi keaslian dokumen SPKL yang diterima?</h3>
+      <p>
+        Pindai QR Code yang terdapat di bagian bawah dokumen SPKL cetak menggunakan kamera ponsel.
+        Halaman verifikasi akan terbuka dan menampilkan status validasi dokumen. Dokumen dinyatakan
+        sah apabila menampilkan status <strong>"TERVALIDASI &amp; SAH"</strong>.
+      </p>
+
+      <h3>12. Apakah pengajuan berstatus REVISED bisa diedit langsung?</h3>
+      <p>
+        Saat ini pengajuan yang berstatus REVISED perlu dikomunikasikan dengan Admin atau approver
+        yang memberikan catatan revisi. Buat pengajuan baru dengan data yang telah diperbaiki
+        sesuai catatan yang diberikan.
+      </p>
+    </div>
+
+    <!-- ================================================================
+       BAB 11 — KONTAK
+  ================================================================ -->
+    <div class="page-break section">
+      <p class="section-number">Bab 11</p>
+      <h1>KONTAK &amp; DUKUNGAN TEKNIS</h1>
+      <hr class="thin" />
+
+      <p>
+        Untuk pertanyaan teknis, laporan kendala, atau permintaan fitur, hubungi melalui saluran berikut:
+      </p>
+
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Jenis Dukungan</th>
+            <th>Kontak</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Kendala Akun &amp; Password</strong></td>
+            <td>Hubungi Super Admin sistem ALUR di lingkungan kerja Anda.</td>
+          </tr>
+          <tr>
+            <td><strong>Permasalahan Teknis Sistem</strong></td>
+            <td>Hubungi tim pengembang sistem.</td>
+          </tr>
+          <tr>
+            <td><strong>Prosedur &amp; Kebijakan Lembur</strong></td>
+            <td>Hubungi Bagian SDM PT PLN Indonesia Power Services UBP Cilegon.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Informasi Sistem</h3>
+      <table class="avoid-break">
+        <thead>
+          <tr>
+            <th>Komponen</th>
+            <th>Informasi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Nama Sistem</td>
+            <td>ALUR — Sistem Manajemen Lembur &amp; Piket</td>
+          </tr>
+          <tr>
+            <td>Platform</td>
+            <td>Aplikasi Web (diakses melalui browser)</td>
+          </tr>
+          <tr>
+            <td>Browser yang Didukung</td>
+            <td>Google Chrome, Mozilla Firefox, Microsoft Edge, Safari (versi terbaru)</td>
+          </tr>
+          <tr>
+            <td>Persyaratan Perangkat</td>
+            <td>GPS/Lokasi aktif untuk pengajuan lembur</td>
+          </tr>
+          <tr>
+            <td>Developer</td>
+            <td>Dzulfikar Adam Sangaji</td>
+          </tr>
+          <tr>
+            <td>Versi Dokumen</td>
+            <td>1.0 — Juni 2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================================================================
+       FOOTER DOKUMEN
+  ================================================================ -->
+    <div class="doc-footer">
+      <div>
+        <strong>ALUR — Sistem Manajemen Lembur &amp; Piket</strong><br />
+        PT PLN Indonesia Power Services | UBP Cilegon<br />
+        <em>Developed by Dzulfikar Adam Sangaji</em>
+      </div>
+      <div style="text-align:right;">
+        Dokumen Internal — Terbatas<br />
+        Versi 1.0 | Juni 2026
+      </div>
+    </div>
+
+  </div><!-- /.container -->
+
+</body>
+
+</html>
