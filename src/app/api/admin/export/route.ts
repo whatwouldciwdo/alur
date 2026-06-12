@@ -65,6 +65,12 @@ export async function GET(req: NextRequest) {
     const approvedApprovals = l.approvals.filter((a) => a.status === "APPROVED");
     const lastApprover = approvedApprovals[approvedApprovals.length - 1];
 
+    // Parse Dasar & Uraian dari field deskripsi (format: "DASAR: ...\n\nURAIAN: ...")
+    const dasarMatch  = l.deskripsi.match(/DASAR:\s*([\s\S]*?)(?:\n\nURAIAN:|\nURAIAN:|$)/i);
+    const uraianMatch = l.deskripsi.match(/URAIAN:\s*([\s\S]*?)$/i);
+    const dasar  = dasarMatch?.[1]?.trim()  ?? l.deskripsi;
+    const uraian = uraianMatch?.[1]?.trim() ?? "-";
+
     return {
       No: idx + 1,
       Kategori: l.kategori ?? "LEMBUR",
@@ -95,7 +101,8 @@ export async function GET(req: NextRequest) {
         hour12: false,
       }),
       Durasi: formatDurasi(new Date(l.tanggalMulai), new Date(l.tanggalSelesai)),
-      Deskripsi: l.deskripsi,
+      "Dasar Pekerjaan": dasar,
+      "Uraian Pekerjaan": uraian,
       Penugas: l.penugas ?? "-",
       Status: l.status,
       "Disetujui Oleh": lastApprover?.approver?.nama ?? "-",
@@ -117,7 +124,8 @@ export async function GET(req: NextRequest) {
     { wch: 10 }, // Jam Mulai
     { wch: 10 }, // Jam Selesai
     { wch: 12 }, // Durasi
-    { wch: 50 }, // Deskripsi
+    { wch: 50 }, // Dasar Pekerjaan
+    { wch: 50 }, // Uraian Pekerjaan
     { wch: 25 }, // Penugas
     { wch: 15 }, // Status
     { wch: 30 }, // Disetujui Oleh
