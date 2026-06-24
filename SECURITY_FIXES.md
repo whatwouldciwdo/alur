@@ -5,7 +5,7 @@ Fixed **13 security vulnerabilities** across CRITICAL, MEDIUM, and LOW severity 
 
 ---
 
-## CRITICAL Fixes (4 issues)
+## CRITICAL Fixes (3 issues)
 
 ### 1. ✅ Fixed IDOR (Insecure Direct Object Reference) in `/api/lembur/[id]`
 **File:** `src/app/api/lembur/[id]/route.ts`  
@@ -43,19 +43,6 @@ Fixed **13 security vulnerabilities** across CRITICAL, MEDIUM, and LOW severity 
 - **Throw errors on invalid files**
 
 **Impact:** ✅ No breaking changes for valid files - only blocks malicious uploads
-
----
-
-### 4. ✅ Sanitized public validation endpoint
-**File:** `src/app/api/validate/[lemburId]/route.ts`  
-**Issue:** Endpoint with no authentication exposed sensitive data (NIP, approver names, personal details)  
-**Fix:** 
-- Keep endpoint public (needed for QR validation)
-- Remove sensitive data: NIP, approver names, deskripsi, penugas
-- Only return: nomorSpkl, status, kategori, tanggal, user.nama (without NIP)
-- Add "valid" flag for better API design
-
-**Impact:** ✅ QR validation still works - just returns less sensitive data
 
 ---
 
@@ -127,8 +114,7 @@ Before pushing, verify these scenarios still work:
 
 ### ✅ QR Validation
 - [ ] Scan QR code returns validation data
-- [ ] No sensitive data (NIP, approver names) exposed
-- [ ] Dummy QR still works
+- [ ] All data visible (NIP, approver names, deskripsi) - BY DESIGN for public validation
 
 ---
 
@@ -148,10 +134,9 @@ Before pushing, verify these scenarios still work:
 2. `src/lib/supabase.ts` - Added file validation + credential check
 3. `src/app/api/lembur/route.ts` - Reduced token expiry
 4. `src/app/api/lembur/[id]/route.ts` - Fixed IDOR
-5. `src/app/api/validate/[lemburId]/route.ts` - Sanitized data
-6. `src/lib/email.ts` - Added HTML escaping
+5. `src/lib/email.ts` - Added HTML escaping
 
-**Total:** 6 files modified
+**Total:** 5 files modified
 
 ---
 
