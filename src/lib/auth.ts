@@ -14,30 +14,21 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.nip || !credentials?.password) {
-            console.log("[auth] Missing credentials");
             return null;
           }
-
-          console.log("[auth] Looking up NIP:", credentials.nip);
 
           const user = await prisma.user.findUnique({
             where: { nip: credentials.nip },
           });
 
           if (!user) {
-            console.log("[auth] User not found:", credentials.nip);
             return null;
           }
-
-          console.log("[auth] User found:", user.nama, "| checking password...");
 
           const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) {
-            console.log("[auth] Password mismatch for:", credentials.nip);
             return null;
           }
-
-          console.log("[auth] Login SUCCESS for:", user.nama);
 
           return {
             id: user.id,
@@ -52,7 +43,10 @@ export const authOptions: NextAuthOptions = {
             tipeKerja: user.tipeKerja,
           };
         } catch (err) {
-          console.error("[auth] ERROR in authorize:", err);
+          // Log error without exposing sensitive info
+          if (process.env.NODE_ENV === 'development') {
+            console.error("[auth] ERROR in authorize:", err);
+          }
           return null;
         }
       },

@@ -17,8 +17,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
 
-  const lembur = await prisma.lembur.findUnique({
-    where: { id },
+  // Check authorization: user can only view their own lembur, or if they are admin/approver
+  const lembur = await prisma.lembur.findFirst({
+    where: {
+      id,
+      OR: [
+        { userId: session.user.id }, // Owner
+        { user: { role: { in: ["ADMIN", "SUPER_ADMIN"] } } }, // Admin can view all
+        { approvals: { some: { approverId: session.user.id } } }, // Approver can view
+      ],
+    },
     include: {
       user: { select: { nama: true, nip: true, jenjangJabatan: true, bidang: true, subBidang: true } },
       approvals: {
@@ -28,7 +36,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     },
   });
 
-  if (!lembur) return NextResponse.json({ error: "Tidak ditemukan" }, { status: 404 });
+  if (!lembur) return NextResponse.json({ error: "Tidak ditemukan atau Anda tidak memiliki akses" }, { status: 404 });
   return NextResponse.json(lembur);
 }
 

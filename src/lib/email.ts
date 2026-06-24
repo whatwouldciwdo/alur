@@ -16,6 +16,17 @@ export function getBaseUrl(): string {
   return base;
 }
 
+// HTML escaping function to prevent XSS
+function escapeHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -112,14 +123,14 @@ export async function sendApprovalRequestEmail({
 
   const html = baseTemplate(`
     <span class="badge">PERSETUJUAN DIPERLUKAN</span>
-    <h2>Halo, ${approverName}!</h2>
-    <p>Anda mendapatkan permintaan persetujuan lembur sebagai <strong>${roleName}</strong>.</p>
+    <h2>Halo, ${escapeHtml(approverName)}!</h2>
+    <p>Anda mendapatkan permintaan persetujuan lembur sebagai <strong>${escapeHtml(roleName)}</strong>.</p>
     <div class="info-box">
-      <div class="info-row"><span class="info-label">Nama Pegawai</span><span class="info-value">: ${pegawaiName}</span></div>
-      <div class="info-row"><span class="info-label">Sub-Bidang</span><span class="info-value">: ${subBidang.replace(/_/g, " ")}</span></div>
-      <div class="info-row"><span class="info-label">Jam Mulai</span><span class="info-value">: ${new Date(tanggalMulai).toLocaleString("id-ID", { dateStyle: "full", timeStyle: "short" })}</span></div>
-      <div class="info-row"><span class="info-label">Jam Selesai</span><span class="info-value">: ${new Date(tanggalSelesai).toLocaleString("id-ID", { dateStyle: "full", timeStyle: "short" })}</span></div>
-      <div class="info-row"><span class="info-label">Deskripsi</span><span class="info-value">: ${deskripsi}</span></div>
+      <div class="info-row"><span class="info-label">Nama Pegawai</span><span class="info-value">: ${escapeHtml(pegawaiName)}</span></div>
+      <div class="info-row"><span class="info-label">Sub-Bidang</span><span class="info-value">: ${escapeHtml(subBidang.replace(/_/g, " "))}</span></div>
+      <div class="info-row"><span class="info-label">Jam Mulai</span><span class="info-value">: ${escapeHtml(new Date(tanggalMulai).toLocaleString("id-ID", { dateStyle: "full", timeStyle: "short" }))}</span></div>
+      <div class="info-row"><span class="info-label">Jam Selesai</span><span class="info-value">: ${escapeHtml(new Date(tanggalSelesai).toLocaleString("id-ID", { dateStyle: "full", timeStyle: "short" }))}</span></div>
+      <div class="info-row"><span class="info-label">Deskripsi</span><span class="info-value">: ${escapeHtml(deskripsi)}</span></div>
     </div>
     <p style="margin-bottom:8px;">Klik salah satu tombol di bawah untuk memberikan keputusan Anda:</p>
     <div style="text-align:center;margin:24px 0;">
@@ -155,14 +166,14 @@ export async function sendApprovedEmail({
 }) {
   const html = baseTemplate(`
     <span class="badge">✓ LEMBUR DISETUJUI</span>
-    <h2>Selamat, ${pegawaiName}!</h2>
+    <h2>Selamat, ${escapeHtml(pegawaiName)}!</h2>
     <p>Pengajuan lembur Anda telah <strong>disetujui oleh semua pihak</strong> dan telah direkap oleh Admin.</p>
     <div class="info-box">
-      <div class="info-row"><span class="info-label">Tanggal Mulai</span><span class="info-value">: ${new Date(tanggalMulai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span></div>
-      <div class="info-row"><span class="info-label">Tanggal Selesai</span><span class="info-value">: ${new Date(tanggalSelesai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span></div>
+      <div class="info-row"><span class="info-label">Tanggal Mulai</span><span class="info-value">: ${escapeHtml(new Date(tanggalMulai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</span></div>
+      <div class="info-row"><span class="info-label">Tanggal Selesai</span><span class="info-value">: ${escapeHtml(new Date(tanggalSelesai).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</span></div>
     </div>
     <p>Lembur Anda telah tercatat dalam sistem. ${pdfAttachment ? "Dokumen SPKL terlampir dalam email ini." : ""} Terima kasih atas dedikasi Anda!</p>
-    ${pdfAttachment ? `<p style="font-size:12px;color:#888;">📎 Dokumen SPKL: <strong>${pdfAttachment.filename}</strong></p>` : ""}
+    ${pdfAttachment ? `<p style="font-size:12px;color:#888;">📎 Dokumen SPKL: <strong>${escapeHtml(pdfAttachment.filename)}</strong></p>` : ""}
   `);
 
   await sendEmail({
@@ -192,11 +203,11 @@ export async function sendRejectedEmail({
 }) {
   const html = baseTemplate(`
     <span class="badge badge-rejected">✗ LEMBUR DITOLAK</span>
-    <h2>Halo, ${pegawaiName}</h2>
-    <p>Pengajuan lembur Anda pada tanggal <strong>${new Date(tanggalMulai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</strong> telah <strong>ditolak</strong>.</p>
+    <h2>Halo, ${escapeHtml(pegawaiName)}</h2>
+    <p>Pengajuan lembur Anda pada tanggal <strong>${escapeHtml(new Date(tanggalMulai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }))}</strong> telah <strong>ditolak</strong>.</p>
     <div class="info-box">
-      <div class="info-row"><span class="info-label">Ditolak oleh</span><span class="info-value">: ${rejectorName} (${roleName})</span></div>
-      <div class="info-row"><span class="info-label">Alasan</span><span class="info-value">: ${catatan || "Tidak ada keterangan."}</span></div>
+      <div class="info-row"><span class="info-label">Ditolak oleh</span><span class="info-value">: ${escapeHtml(rejectorName)} (${escapeHtml(roleName)})</span></div>
+      <div class="info-row"><span class="info-label">Alasan</span><span class="info-value">: ${escapeHtml(catatan || "Tidak ada keterangan.")}</span></div>
     </div>
     <p>Jika ada pertanyaan, silakan hubungi atasan Anda secara langsung.</p>
   `);
@@ -225,11 +236,11 @@ export async function sendRevisionEmail({
 }) {
   const html = baseTemplate(`
     <span class="badge badge-revised">⚠ REVISI DIPERLUKAN</span>
-    <h2>Halo, ${pegawaiName}</h2>
-    <p>Pengajuan lembur Anda pada tanggal <strong>${new Date(tanggalMulai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</strong> memerlukan <strong>revisi</strong>.</p>
+    <h2>Halo, ${escapeHtml(pegawaiName)}</h2>
+    <p>Pengajuan lembur Anda pada tanggal <strong>${escapeHtml(new Date(tanggalMulai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }))}</strong> memerlukan <strong>revisi</strong>.</p>
     <div class="info-box">
-      <div class="info-row"><span class="info-label">Diminta revisi oleh</span><span class="info-value">: ${revisorName} (${roleName})</span></div>
-      <div class="info-row"><span class="info-label">Catatan</span><span class="info-value">: ${catatan || "Tidak ada keterangan."}</span></div>
+      <div class="info-row"><span class="info-label">Diminta revisi oleh</span><span class="info-value">: ${escapeHtml(revisorName)} (${escapeHtml(roleName)})</span></div>
+      <div class="info-row"><span class="info-label">Catatan</span><span class="info-value">: ${escapeHtml(catatan || "Tidak ada keterangan.")}</span></div>
     </div>
     <p>Silakan login ke aplikasi ALUR untuk memperbaiki pengajuan Anda.</p>
     <p style="text-align:center; margin-top:24px;">
@@ -258,7 +269,7 @@ export async function sendPasswordResetEmail({
 }) {
   const html = baseTemplate(`
     <span class="badge">🔐 RESET PASSWORD</span>
-    <h2>Halo, ${pegawaiName}!</h2>
+    <h2>Halo, ${escapeHtml(pegawaiName)}!</h2>
     <p>Super Admin telah mengirimkan permintaan reset password untuk akun ALUR Anda.</p>
     <p>Klik tombol di bawah untuk membuat password baru. Link ini <strong>berlaku selama 15 menit</strong> dan hanya bisa digunakan sekali.</p>
     <p style="text-align:center; margin-top:28px; margin-bottom:28px;">

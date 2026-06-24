@@ -15,7 +15,7 @@ function generateToken(): string {
 
 function tokenExpiry(): Date {
   const d = new Date();
-  d.setDate(d.getDate() + 7);
+  d.setHours(d.getHours() + 48); // 48 jam (2 hari)
   return d;
 }
 
